@@ -1,0 +1,16 @@
+{
+    "name": "USP.Utility",
+    "rootNamespace": "USP.Utility",
+    "references": [
+        "GUID:c229f43c2485c8140bbeff3ab46936ab"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

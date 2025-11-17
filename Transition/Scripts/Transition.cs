@@ -16,8 +16,8 @@ namespace USP
             public void Play(TweenCallback callback, float interval = 1F)
             {
                   Cancel();
+                  Initialize();
                   sequence = DOTween.Sequence()
-                        .AppendCallback(Initialize)
                         .Append(IntroTween)
                         .AppendCallback(callback)
                         .AppendInterval(interval)

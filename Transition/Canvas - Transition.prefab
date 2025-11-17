@@ -474,7 +474,7 @@ MonoBehaviour:
   Duration: 0.4
   Target: 1
   EaseIn: 2
-  EaseOut: 1
+  EaseOut: 3
 --- !u!1 &8774073326709567701
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,6 +535,6 @@ MonoBehaviour:
     Background: {fileID: 21300000, guid: 2bf21cc3664074d4aaf0550726658ef3, type: 3}
   - Shape: {fileID: -975836996, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
     Background: {fileID: 21300000, guid: e975fd5b65b0e9d4d851a7ae74a04b3b, type: 3}
-  Duration: 1
-  EaseIn: 1
-  EaseOut: 1
+  Duration: 0.75
+  EaseIn: 17
+  EaseOut: 18

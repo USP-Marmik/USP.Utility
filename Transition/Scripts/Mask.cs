@@ -23,12 +23,16 @@ namespace USP
 
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
+
             protected override Tween IntroTween
             {
                   get
                   {
-                        Vector2 size = background.rectTransform.sizeDelta;
-                        return shape.rectTransform.DOSizeDelta(2F * Mathf.Max(size.x, size.y) * Vector2.one, Duration).SetEase(EaseIn);
+                        Vector2 backgroundSize = background.sprite.rect.size;
+                        Vector2 shapeSize = shape.sprite.rect.size;
+                        Vector2 scale = new(backgroundSize.x / shapeSize.x, backgroundSize.y / shapeSize.y);
+
+                        return shape.rectTransform.DOSizeDelta(Mathf.Max(scale.x, scale.y) * shapeSize, Duration).SetEase(EaseIn);
                   }
             }
             protected override Tween ExitTween => shape.rectTransform.DOSizeDelta(Vector2.zero, Duration).SetEase(EaseOut);
