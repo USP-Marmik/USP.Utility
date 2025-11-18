@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using DG.Tweening;
+using System;
 
 namespace USP
 {
@@ -9,7 +10,11 @@ namespace USP
             [SerializeField] private Transition[] transitions;
 
 
-            public void Play(int index, TweenCallback callback, float interval = 1F) => transitions[Mathf.Clamp(index, 0, transitions.Length - 1)].Play(callback, interval);
-            public void PlayRandom(TweenCallback callback, float interval = 1F) => transitions[Random.Range(0, transitions.Length)].Play(callback, interval);
+            public void Play(int index, TweenCallback midpoint, float interval, TweenCallback finish = null)
+            {
+                  var selected = transitions[Mathf.Clamp(index, 0, transitions.Length - 1)];
+                  selected.Play(midpoint, interval, finish);
+            }
+            public void PlayRandom(TweenCallback midpoint, float interval, TweenCallback finish = null) => Play(UnityEngine.Random.Range(0, transitions.Length), midpoint, interval, finish);
       }
 }

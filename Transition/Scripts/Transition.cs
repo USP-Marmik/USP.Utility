@@ -13,27 +13,22 @@ namespace USP
             protected abstract Tween ExitTween { get; }
 
 
-            public void Play(TweenCallback callback, float interval = 1F)
-            {
-                  Cancel();
-                  Initialize();
-                  sequence = DOTween.Sequence()
-                        .Append(IntroTween)
-                        .AppendCallback(callback)
-                        .AppendInterval(interval)
-                        .Append(ExitTween)
-                        .SetLink(gameObject)
-                        .SetRecyclable(true)
-                        .OnComplete(OnFinish)
-                        .Play();
-            }
-            public void Cancel()
+            protected virtual void OnDisable()
             {
                   if (sequence != null && sequence.IsActive()) sequence.Kill(false);
                   sequence = null;
             }
 
+            public void Play(TweenCallback midpoint, float hold, TweenCallback finish = null)
+            {
+                  OnDisable();
+                  Initialize();
+                  sequence = DOTween.Sequence()
+                        .Append(IntroTween).AppendCallback(midpoint).AppendInterval(hold).Append(ExitTween)
+                        .SetLink(gameObject).SetRecyclable(true).Play()
+                        .OnComplete(finish);
+            }
+
             protected abstract void Initialize();
-            protected virtual void OnFinish() { }
       }
 }

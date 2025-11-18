@@ -20,6 +20,7 @@ namespace USP
 
             [Header("• C O N F I G U R A T I O N")]
             public float Duration = 1F;
+            public float Scale = 1F;
 
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
@@ -31,26 +32,21 @@ namespace USP
                         Vector2 backgroundSize = background.sprite.rect.size;
                         Vector2 shapeSize = shape.sprite.rect.size;
                         Vector2 scale = new(backgroundSize.x / shapeSize.x, backgroundSize.y / shapeSize.y);
-
-                        return shape.rectTransform.DOSizeDelta(Mathf.Max(scale.x, scale.y) * shapeSize, Duration).SetEase(EaseIn);
+                        return shape.rectTransform.DOSizeDelta(Scale * Mathf.Max(scale.x, scale.y) * shapeSize, Duration).SetEase(EaseIn);
                   }
             }
-            protected override Tween ExitTween => shape.rectTransform.DOSizeDelta(Vector2.zero, Duration).SetEase(EaseOut);
+            protected override Tween ExitTween => shape.rectTransform.DOSizeDelta(Vector2.zero, Duration).SetEase(EaseOut)
+                  .OnKill(() => shape.rectTransform.sizeDelta = Vector2.zero).OnComplete(() => gameObject.SetActive(false));
 
             protected override void Initialize()
             {
                   gameObject.SetActive(true);
 
                   MaskSet selected = sets[Random.Range(0, sets.Length)];
-
                   shape.sprite = selected.Shape;
                   background.sprite = selected.Background;
 
                   background.rectTransform.sizeDelta = new(Screen.width, Screen.height);
-            }
-            protected override void OnFinish()
-            {
-                  gameObject.SetActive(false);
             }
       }
 }

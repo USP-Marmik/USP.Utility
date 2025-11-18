@@ -20,7 +20,7 @@ namespace USP
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
             protected override Tween IntroTween => group.DOFade(Target, Duration).SetEase(EaseIn);
-            protected override Tween ExitTween => group.DOFade(0F, Duration).SetEase(EaseOut);
+            protected override Tween ExitTween => group.DOFade(0F, Duration).SetEase(EaseOut).OnKill(() => group.alpha = 0F);
 
             protected override void Initialize()
             {

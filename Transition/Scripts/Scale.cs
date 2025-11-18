@@ -1,6 +1,7 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+
+using DG.Tweening;
 
 namespace USP
 {
@@ -18,12 +19,14 @@ namespace USP
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
             protected override Tween IntroTween => transform.DOScale(Target, Duration).SetEase(EaseIn);
-            protected override Tween ExitTween => transform.DOScale(0F, Duration).SetEase(EaseOut);
+            protected override Tween ExitTween => transform.DOScale(0F, Duration).SetEase(EaseOut).OnKill(() => transform.localScale = Vector3.zero);
 
             protected override void Initialize()
             {
                   image.color = OverlayShade;
                   image.sprite = shapes[Random.Range(0, shapes.Length)];
+
+                  transform.localScale = Vector3.zero;
             }
       }
 }
