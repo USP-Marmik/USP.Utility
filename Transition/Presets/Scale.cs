@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 using DG.Tweening;
 
-namespace USP
+namespace USP.Utility
 {
       [RequireComponent(typeof(Image))]
       public class Scale : Transition
@@ -18,8 +18,8 @@ namespace USP
             public float Target = 8F;
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
-            protected override Tween IntroTween => transform.DOScale(Target, Duration).SetEase(EaseIn);
-            protected override Tween ExitTween => transform.DOScale(0F, Duration).SetEase(EaseOut).OnKill(() => transform.localScale = Vector3.zero);
+            protected override Tween Intro => transform.DOScale(Target, Duration).SetEase(EaseIn);
+            protected override Tween Outro => transform.DOScale(0F, Duration).SetEase(EaseOut).OnKill(() => transform.localScale = Vector3.zero);
 
             protected override void Initialize()
             {

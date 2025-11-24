@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace USP
+namespace USP.Utility
 {
       [DefaultExecutionOrder(1)]
       public class GameManager : MonoBehaviour
@@ -9,20 +9,10 @@ namespace USP
             public bool IsMultiTouch;
 
 
-            private void Start()
+            private void Awake()
             {
                   Screen.orientation = Orientation;
-            }
-            private void OnEnable()
-            {
                   Input.multiTouchEnabled = IsMultiTouch;
-            }
-            private void OnDisable()
-            {
-                  if (IsMultiTouch)
-                  {
-                        Input.multiTouchEnabled = false;
-                  }
             }
       }
 }

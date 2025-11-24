@@ -254,16 +254,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: USP::USP.Scale
   image: {fileID: 6793084459995029101}
-  shapes:
-  - {fileID: -975836996, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-  - {fileID: 729665070, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-  - {fileID: 1439883222, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-  - {fileID: -1976122884, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
+  shapes: []
   OverlayShade: {r: 1, g: 1, b: 1, a: 1}
   Duration: 1
-  Target: 4
-  EaseIn: 11
-  EaseOut: 12
+  Target: 1
+  EaseIn: 1
+  EaseOut: 1
 --- !u!1 &7555184672666755090
 GameObject:
   m_ObjectHideFlags: 0
@@ -471,10 +467,10 @@ MonoBehaviour:
   image: {fileID: 4495160938660982662}
   group: {fileID: 516190156314112187}
   OverlayShade: {r: 1, g: 1, b: 1, a: 1}
-  Duration: 0.4
+  Duration: 1
   Target: 1
-  EaseIn: 2
-  EaseOut: 3
+  EaseIn: 1
+  EaseOut: 1
 --- !u!1 &8774073326709567701
 GameObject:
   m_ObjectHideFlags: 0
@@ -526,15 +522,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: USP::USP.Mask
   shape: {fileID: 6273302879176165034}
   background: {fileID: 7552419637272164791}
-  sets:
-  - Shape: {fileID: -1482193850, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-    Background: {fileID: 21300000, guid: a5f25be2c6a3e4b4cb6a927f1c66860e, type: 3}
-  - Shape: {fileID: 1636093098, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-    Background: {fileID: 21300000, guid: ceaa2568d694c5d42adf9b5843966993, type: 3}
-  - Shape: {fileID: -1976122884, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-    Background: {fileID: 21300000, guid: 2bf21cc3664074d4aaf0550726658ef3, type: 3}
-  - Shape: {fileID: -975836996, guid: b21970f8b2beece4bbadaa2449f32ffa, type: 3}
-    Background: {fileID: 21300000, guid: e975fd5b65b0e9d4d851a7ae74a04b3b, type: 3}
-  Duration: 0.75
-  EaseIn: 17
-  EaseOut: 18
+  sets: []
+  Duration: 1
+  Scale: 1
+  EaseIn: 1
+  EaseOut: 1

@@ -3,7 +3,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace USP
+namespace USP.Utility
 {
       public class Mask : Transition
       {
@@ -25,7 +25,7 @@ namespace USP
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
 
-            protected override Tween IntroTween
+            protected override Tween Intro
             {
                   get
                   {
@@ -35,7 +35,8 @@ namespace USP
                         return shape.rectTransform.DOSizeDelta(Scale * Mathf.Max(scale.x, scale.y) * shapeSize, Duration).SetEase(EaseIn);
                   }
             }
-            protected override Tween ExitTween => shape.rectTransform.DOSizeDelta(Vector2.zero, Duration).SetEase(EaseOut)
+            protected override Tween Outro => 
+                  shape.rectTransform.DOSizeDelta(Vector2.zero, Duration).SetEase(EaseOut)
                   .OnKill(() => shape.rectTransform.sizeDelta = Vector2.zero).OnComplete(() => gameObject.SetActive(false));
 
             protected override void Initialize()

@@ -1,12 +1,15 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace USP
+namespace USP.Utility
 {
       public static class InputController
       {
-            public static readonly Touchscreen Touchscreen = Touchscreen.current;
-            public static readonly Mouse Mouse = Mouse.current;
+            private static Touchscreen _touchscreen; 
+            private static Mouse _mouse;
+
+            public static Touchscreen Touchscreen => _touchscreen ??= Touchscreen.current;
+            public static Mouse Mouse => _mouse ??= Mouse.current;
 
             public static Vector2 Position => Touchscreen?.primaryTouch.position.ReadValue() ?? Mouse?.position.ReadValue() ?? default;
             public static bool WasPressed => Touchscreen?.primaryTouch.press.wasPressedThisFrame ?? Mouse?.leftButton.wasPressedThisFrame ?? false;

@@ -3,7 +3,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace USP
+namespace USP.Utility
 {
       [RequireComponent(typeof(CanvasGroup), typeof(Image))]
       public class Fade : Transition
@@ -19,8 +19,8 @@ namespace USP
 
             public Ease EaseIn = Ease.Linear, EaseOut = Ease.Linear;
 
-            protected override Tween IntroTween => group.DOFade(Target, Duration).SetEase(EaseIn);
-            protected override Tween ExitTween => group.DOFade(0F, Duration).SetEase(EaseOut).OnKill(() => group.alpha = 0F);
+            protected override Tween Intro => group.DOFade(Target, Duration).SetEase(EaseIn);
+            protected override Tween Outro => group.DOFade(0F, Duration).SetEase(EaseOut).OnKill(() => group.alpha = 0F);
 
             protected override void Initialize()
             {
