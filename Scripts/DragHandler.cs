@@ -32,18 +32,17 @@ namespace USP.Utility
                               if (collider.TryGetComponent(out Draggable d))
                               {
                                     current = d;
-                                    current.Begin();
+                                    current.IsDragging = true;
                                     break;
                               }
                         }
                   }
-
                   if (current == null) return;
 
                   if (InputController.IsHeld) current.Position = WorldPosition;
                   if (InputController.WasReleased)
                   {
-                        current.End();
+                        current.IsDragging = false;
                         current = null;
                   }
             }

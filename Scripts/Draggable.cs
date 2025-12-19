@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,14 +14,23 @@ namespace USP.Utility
             public Collider2D Confiner;
 
             [Header("• E V E N T S")]
-            public UnityEvent OnBegin;
-            public UnityEvent OnEnd;
+            public UnityEvent OnPick;
+            public UnityEvent OnRelease;
 
 
-            [NonSerialized] private new Collider2D collider;
+            private new Collider2D collider;
             private Vector2 velocity;
+            private bool isDragging; public bool IsDragging
+            {
+                  get => isDragging;
+                  internal set
+                  {
+                        if (value == isDragging) return;
 
-            public bool IsDragging { get; private set; }
+                        isDragging = value;
+                        (value ? OnPick : OnRelease).Invoke();
+                  }
+            }
             internal Vector2 Position
             {
                   get => transform.position;
@@ -44,29 +52,18 @@ namespace USP.Utility
             {
                   collider = GetComponent<Collider2D>();
             }
-            private void OnDisable() => IsDragging = false;
-
-            internal void Begin()
-            {
-                  IsDragging = true;
-                  OnBegin.Invoke();
-            }
-            internal void End()
-            {
-                  IsDragging = false;
-                  OnEnd.Invoke();
-            }
+            private void OnDisable() => isDragging = false;
 
             private Vector2 ClampTarget(Vector2 target)
             {
-                  Bounds confinderBounds = Confiner.bounds, colliderBounds = collider.bounds;
+                  Bounds confinerBounds = Confiner.bounds, colliderBounds = collider.bounds;
 
                   Vector2 offset = (Vector2) (colliderBounds.center - transform.position);
                   Vector2 desiredCenter = target + offset;
+                  Vector2 min = confinerBounds.min + colliderBounds.extents, max = confinerBounds.max - colliderBounds.extents;
 
-                  Vector2 min = confinderBounds.min + colliderBounds.extents, max = confinderBounds.max - colliderBounds.extents;
-                  if (min.x > max.x) min.x = max.x = confinderBounds.center.x;
-                  if (min.y > max.y) min.y = max.y = confinderBounds.center.y;
+                  if (min.x > max.x) min.x = max.x = confinerBounds.center.x;
+                  if (min.y > max.y) min.y = max.y = confinerBounds.center.y;
 
                   Vector2 output = new(Mathf.Clamp(desiredCenter.x, min.x, max.x), Mathf.Clamp(desiredCenter.y, min.y, max.y));
 
