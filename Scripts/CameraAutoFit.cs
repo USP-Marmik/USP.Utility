@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace USP.Utility
+namespace USP.Minigame.Paula
 {
       [RequireComponent(typeof(Camera))]
       public class CameraAutoFit : MonoBehaviour
@@ -24,20 +24,19 @@ namespace USP.Utility
             {
                   if (autoApplyOnStart) Apply(Mode);
             }
-
             public void Apply(FitMode mode)
             {
-                  float aspectRatio = (float) Screen.width / Screen.height;
+                  float aspect = (float) Screen.width / Screen.height;
+                  Bounds bounds = Background.bounds;
 
-                  Vector2 backgroundSize = Background.sprite.bounds.size;
-                  float orthographicSize = mode switch
-                  {
-                        FitMode.Horizontal => backgroundSize.x / (2F * aspectRatio),
-                        FitMode.Vertical => Mathf.Max(backgroundSize.y / 2F, backgroundSize.x / (2F * aspectRatio)),
-                        _ => MaxOrthographicSize
-                  };
+                  float target = Mathf.Min(mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize }, MaxOrthographicSize);
 
-                  Camera.orthographicSize = Mathf.Min(orthographicSize, MaxOrthographicSize);
+                  Camera.orthographicSize = target;
+
+                  Vector3 position = Camera.transform.position;
+                  position.x = bounds.center.x;
+                  position.y = bounds.center.y;
+                  Camera.transform.position = position;
             }
       }
 }
