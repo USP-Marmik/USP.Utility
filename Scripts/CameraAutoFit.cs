@@ -24,6 +24,7 @@ namespace USP.Minigame.Paula
             {
                   if (autoApplyOnStart) Apply(Mode);
             }
+
             public void Apply(FitMode mode)
             {
                   float aspect = (float) Screen.width / Screen.height;
