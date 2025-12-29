@@ -7,8 +7,9 @@ namespace USP.Minigame.Paula
       {
             public enum FitMode { Horizontal, Vertical }
 
-            public SpriteRenderer Background;
             public Camera Camera;
+            public SpriteRenderer Background;
+            public Vector2 Padding;
 
             public FitMode Mode;
             public float MaxOrthographicSize = 5.4F;
@@ -28,7 +29,9 @@ namespace USP.Minigame.Paula
             public void Apply(FitMode mode)
             {
                   float aspect = (float) Screen.width / Screen.height;
+
                   Bounds bounds = Background.bounds;
+                  bounds.Expand(new Vector3(Padding.x * 2F, Padding.y * 2F));
 
                   float target = Mathf.Min(mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize }, MaxOrthographicSize);
 

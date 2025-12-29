@@ -50,7 +50,11 @@ namespace USP.Utility
                   yield return new WaitForEndOfFrame();
 
                   bool locked = piece.IsLocked;
-                  if (locked) gameObject.SetActive(false);
+                  if (locked)
+                  {
+                        gameObject.SetActive(false);
+                        piece.transform.DOScale(Vector2.one, 0.3F).SetEase(Ease.OutSine);
+                  }
                   else
                         transform
                               .DOScale(iconScale, 0.2F)
@@ -58,9 +62,8 @@ namespace USP.Utility
                               .OnComplete(() => DOTween.Sequence()
                               .AppendCallback(() => piece.transform.SetParent(transform, true))
                               .Append(piece.transform.DOLocalMove(Vector2.zero, 0.2F).SetEase(Ease.InOutSine))
+                              .Join(piece.transform.DOScale(pieceScale, 0.3F).SetEase(Ease.OutSine))
                               .Play());
-
-                  piece.transform.DOScale(locked ? Vector2.one : pieceScale, 0.3F).SetEase(Ease.OutSine);
             }
       }
 }
