@@ -5,13 +5,13 @@ using UnityEngine.Events;
 
 namespace USP.Utility
 {
-      [RequireComponent(typeof(SpriteRenderer), typeof(Draggable), typeof(Rigidbody2D))]
+      [RequireComponent(typeof(SpriteRenderer), typeof(DraggableObject), typeof(Rigidbody2D))]
       public class Piece : MonoBehaviour
       {
             [Header("• R E F E R E N C E S")]
             [SerializeField] private new SpriteRenderer renderer;
             [SerializeField] private Sprite key;
-            [SerializeField] private Draggable drag;
+            [SerializeField] private DraggableObject drag;
             [SerializeField] private new Rigidbody2D rigidbody;
 
             [Header("• T W E E N")]
@@ -28,7 +28,7 @@ namespace USP.Utility
             private void Reset()
             {
                   renderer = GetComponent<SpriteRenderer>();
-                  drag = GetComponent<Draggable>();
+                  drag = GetComponent<DraggableObject>();
                   rigidbody = GetComponent<Rigidbody2D>();
             }
             private void OnEnable()
