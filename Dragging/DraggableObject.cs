@@ -9,6 +9,7 @@ namespace USP.Utility
             [Header("• M O T I O N")]
             [Min(0f)] public float SmoothTime = 0.1F;
             public bool FreezeX, FreezeY;
+            public Vector2 DragOffset;
 
             [Header("• B O U N D S")]
             public Collider2D Confiner;
@@ -34,7 +35,7 @@ namespace USP.Utility
 
             public void DragTo(Vector2 position)
             {
-                  Vector2 target = Confiner == null ? position : ClampTarget(position);
+                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + DragOffset;
                   Vector3 p = transform.position;
 
                   if (!FreezeX && p.x != target.x) p.x = Mathf.SmoothDamp(p.x, target.x, ref velocity.x, SmoothTime);
