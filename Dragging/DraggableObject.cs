@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,17 +11,24 @@ namespace USP.Utility
             [Min(0f)] public float SmoothTime = 0.1F;
             public bool FreezeX, FreezeY;
             public Vector2 DragOffset;
+            private Vector2 velocity;
 
             [Header("• B O U N D S")]
             public Collider2D Confiner;
+            private Collider2D area;
 
             [Header("• E V E N T S")]
             public UnityEvent OnPick;
             public UnityEvent OnRelease;
+            public UnityEvent OnReturn;
 
-            private Collider2D area;
-            private Vector2 velocity;
+            [Header("• T W E E N   S E T T I N G S")]
+            public bool ReturnOnRelease;
+            public float ReturnDuration = 0.5F;
+            public Ease ReturnEase = Ease.OutQuad;
+            private Tween returnTween;
 
+            public Vector2 Origin { get; set; }
             public bool IsDragging { get; private set; }
 
 
@@ -28,11 +36,26 @@ namespace USP.Utility
             {
                   area = GetComponent<Collider2D>();
 
-                  OnPick.AddListener(() => IsDragging = true);
-                  OnRelease.AddListener(OnDisable);
+                  Origin = transform.position;
             }
-            private void OnDisable() => IsDragging = false;
+            private void OnEnable()
+            {
+                  OnPick.AddListener(HandlePick);
+                  OnRelease.AddListener(HandleRelease);
+            }
+            private void OnDisable()
+            {
+                  OnPick.RemoveListener(HandlePick);
+                  OnRelease.RemoveListener(HandleRelease);
 
+                  IsDragging = false;
+            }
+
+            public void Return()
+            {
+                  returnTween?.Kill(false);
+                  returnTween = transform.DOMove(Origin, ReturnDuration).SetEase(ReturnEase).OnComplete(() => { returnTween = null; OnReturn.Invoke(); });
+            }
             public void DragTo(Vector2 position)
             {
                   Vector2 target = (Confiner == null ? position : ClampTarget(position)) + DragOffset;
@@ -44,6 +67,17 @@ namespace USP.Utility
                   transform.position = p;
             }
 
+            private void HandlePick()
+            {
+                  returnTween?.Kill(false); returnTween = null;
+
+                  IsDragging = true;
+            }
+            private void HandleRelease()
+            {
+                  IsDragging = false;
+                  if (ReturnOnRelease) Return();
+            }
             private Vector2 ClampTarget(Vector2 target)
             {
                   Bounds confinerBounds = Confiner.bounds, colliderBounds = area.bounds;
