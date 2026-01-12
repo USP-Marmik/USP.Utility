@@ -26,9 +26,9 @@ namespace USP.Utility
             public bool ReturnOnRelease;
             public float ReturnDuration = 0.5F;
             public Ease ReturnEase = Ease.OutQuad;
-            private Vector2 initialPosition;
             private Tween returnTween;
 
+            public Vector2 Origin { get; set; }
             public bool IsDragging { get; private set; }
 
 
@@ -36,7 +36,7 @@ namespace USP.Utility
             {
                   area = GetComponent<Collider2D>();
 
-                  initialPosition = transform.position;
+                  Origin = transform.position;
             }
             private void OnEnable()
             {
@@ -54,7 +54,7 @@ namespace USP.Utility
             public void Return()
             {
                   returnTween?.Kill(false);
-                  returnTween = transform.DOMove(initialPosition, ReturnDuration).SetEase(ReturnEase).OnComplete(() => { returnTween = null; OnReturn.Invoke(); });
+                  returnTween = transform.DOMove(Origin, ReturnDuration).SetEase(ReturnEase).OnComplete(() => { returnTween = null; OnReturn.Invoke(); });
             }
             public void DragTo(Vector2 position)
             {
