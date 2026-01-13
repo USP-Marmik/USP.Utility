@@ -16,10 +16,16 @@ namespace USP.Utility
             }
 
             public void PlayImmediate(int index) => source.PlayOneShot(audioClips[index]);
+            public void PlayImmediate(int index, float volume) => source.PlayOneShot(audioClips[index], volume);
             public void Play(int index)
             {
                   if (source.isPlaying) source.Stop();
                   PlayImmediate(index);
+            }
+            public void Play(int index, float volume)
+            {
+                  if (source.isPlaying) source.Stop();
+                  PlayImmediate(index, volume);
             }
       }
 }

@@ -1,6 +1,7 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
+
+using DG.Tweening;
 
 namespace USP.Utility
 {
@@ -8,14 +9,13 @@ namespace USP.Utility
       public sealed class DraggableObject : MonoBehaviour
       {
             [Header("• M O T I O N")]
-            [Min(0f)] public float SmoothTime = 0.1F;
+            [Min(0F)] public float SmoothTime = 0.1F;
+            public float MaximumSpeed = 1000F;
             public bool FreezeX, FreezeY;
-            public Vector2 DragOffset;
-            private Vector2 velocity;
+            public Vector2 PivotOffset;
 
             [Header("• B O U N D S")]
             public Collider2D Confiner;
-            private Collider2D area;
 
             [Header("• E V E N T S")]
             public UnityEvent OnPick;
@@ -23,64 +23,76 @@ namespace USP.Utility
             public UnityEvent OnReturn;
 
             [Header("• T W E E N   S E T T I N G S")]
-            public bool ReturnOnRelease;
+            public bool AutoReturnOnRelease;
             public float ReturnDuration = 0.5F;
             public Ease ReturnEase = Ease.OutQuad;
             private Tween returnTween;
 
-            public Vector2 Origin { get; set; }
+            private Vector2 _velocity;
+            private new Collider2D collider;
+
             public bool IsDragging { get; private set; }
+            public Vector2 Origin { get; set; }
+            public Vector2 Velocity => _velocity;
+            public bool IsReturning => returnTween != null;
 
 
             private void Awake()
             {
-                  area = GetComponent<Collider2D>();
+                  collider = GetComponent<Collider2D>();
 
                   Origin = transform.position;
             }
-            private void OnEnable()
-            {
-                  OnPick.AddListener(HandlePick);
-                  OnRelease.AddListener(HandleRelease);
-            }
             private void OnDisable()
             {
-                  OnPick.RemoveListener(HandlePick);
-                  OnRelease.RemoveListener(HandleRelease);
-
                   IsDragging = false;
             }
 
-            public void Return()
+            public void Pick()
             {
-                  returnTween?.Kill(false);
-                  returnTween = transform.DOMove(Origin, ReturnDuration).SetEase(ReturnEase).OnComplete(() => { returnTween = null; OnReturn.Invoke(); });
+                  CancelReturn();
+                  IsDragging = true;
+                  OnPick.Invoke();
             }
             public void DragTo(Vector2 position)
             {
-                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + DragOffset;
+                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + PivotOffset;
                   Vector3 p = transform.position;
 
-                  if (!FreezeX && p.x != target.x) p.x = Mathf.SmoothDamp(p.x, target.x, ref velocity.x, SmoothTime);
-                  if (!FreezeY && p.y != target.y) p.y = Mathf.SmoothDamp(p.y, target.y, ref velocity.y, SmoothTime);
+                  if (!FreezeX && p.x != target.x)
+                        p.x = Mathf.SmoothDamp(p.x, target.x, ref _velocity.x, SmoothTime, MaximumSpeed);
+
+                  if (!FreezeY && p.y != target.y)
+                        p.y = Mathf.SmoothDamp(p.y, target.y, ref _velocity.y, SmoothTime, MaximumSpeed);
 
                   transform.position = p;
             }
-
-            private void HandlePick()
-            {
-                  returnTween?.Kill(false); returnTween = null;
-
-                  IsDragging = true;
-            }
-            private void HandleRelease()
+            public void Release()
             {
                   IsDragging = false;
-                  if (ReturnOnRelease) Return();
+                  if (AutoReturnOnRelease) Return();
+                  OnRelease.Invoke();
             }
+            public void Return()
+            {
+                  CancelReturn();
+                  returnTween = transform.DOMove(Origin, ReturnDuration)
+                        .SetEase(ReturnEase)
+                        .OnComplete(() =>
+                        {
+                              returnTween = null;
+                              OnReturn.Invoke();
+                        });
+            }
+            public void CancelReturn()
+            {
+                  returnTween?.Kill(false);
+                  returnTween = null;
+            }
+
             private Vector2 ClampTarget(Vector2 target)
             {
-                  Bounds confinerBounds = Confiner.bounds, colliderBounds = area.bounds;
+                  Bounds confinerBounds = Confiner.bounds, colliderBounds = collider.bounds;
 
                   Vector2 offset = (Vector2) (colliderBounds.center - transform.position);
                   Vector2 desiredCenter = target + offset;
