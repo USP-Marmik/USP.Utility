@@ -23,13 +23,14 @@ namespace USP.Utility
             public UnityEvent OnReturn;
 
             [Header("• T W E E N   S E T T I N G S")]
-            public bool ReturnOnRelease;
+            public bool AutoReturnOnRelease;
             public float ReturnDuration = 0.5F;
             public Ease ReturnEase = Ease.OutQuad;
             private Tween returnTween;
 
             public Vector2 Origin { get; set; }
             public bool IsDragging { get; private set; }
+            public bool IsReturning => returnTween != null;
 
 
             private void Awake()
@@ -53,8 +54,19 @@ namespace USP.Utility
 
             public void Return()
             {
+                  CancelReturn();
+                  returnTween = transform.DOMove(Origin, ReturnDuration)
+                        .SetEase(ReturnEase)
+                        .OnComplete(() =>
+                        {
+                              returnTween = null;
+                              OnReturn.Invoke();
+                        });
+            }
+            public void CancelReturn()
+            {
                   returnTween?.Kill(false);
-                  returnTween = transform.DOMove(Origin, ReturnDuration).SetEase(ReturnEase).OnComplete(() => { returnTween = null; OnReturn.Invoke(); });
+                  returnTween = null;
             }
             public void DragTo(Vector2 position)
             {
@@ -69,15 +81,15 @@ namespace USP.Utility
 
             private void HandlePick()
             {
-                  returnTween?.Kill(false); returnTween = null;
-
+                  CancelReturn();
                   IsDragging = true;
             }
             private void HandleRelease()
             {
                   IsDragging = false;
-                  if (ReturnOnRelease) Return();
+                  if (AutoReturnOnRelease) Return();
             }
+
             private Vector2 ClampTarget(Vector2 target)
             {
                   Bounds confinerBounds = Confiner.bounds, colliderBounds = area.bounds;
