@@ -64,14 +64,14 @@ namespace USP.Utility
                                     if (collider.TryGetComponent(out DraggableObject d) && d.enabled)
                                     {
                                           current = d;
-                                          current.OnPick.Invoke();
+                                          current.Pick();
                                           break;
                                     }
                               }
                               break;
 
                         case InputActionPhase.Canceled when current != null:
-                              current.OnRelease.Invoke();
+                              current.Release();
                               current = null;
                               break;
 

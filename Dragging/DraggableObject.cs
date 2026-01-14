@@ -1,6 +1,7 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
+
+using DG.Tweening;
 
 namespace USP.Utility
 {
@@ -39,19 +40,33 @@ namespace USP.Utility
 
                   Origin = transform.position;
             }
-            private void OnEnable()
-            {
-                  OnPick.AddListener(HandlePick);
-                  OnRelease.AddListener(HandleRelease);
-            }
             private void OnDisable()
             {
-                  OnPick.RemoveListener(HandlePick);
-                  OnRelease.RemoveListener(HandleRelease);
-
                   IsDragging = false;
             }
 
+            public void Pick()
+            {
+                  CancelReturn();
+                  IsDragging = true;
+                  OnPick.Invoke();
+            }
+            public void DragTo(Vector2 position)
+            {
+                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + DragOffset;
+                  Vector3 p = transform.position;
+
+                  if (!FreezeX && p.x != target.x) p.x = Mathf.SmoothDamp(p.x, target.x, ref velocity.x, SmoothTime);
+                  if (!FreezeY && p.y != target.y) p.y = Mathf.SmoothDamp(p.y, target.y, ref velocity.y, SmoothTime);
+
+                  transform.position = p;
+            }
+            public void Release()
+            {
+                  IsDragging = false;
+                  if (AutoReturnOnRelease) Return();
+                  OnRelease.Invoke();
+            }
             public void Return()
             {
                   CancelReturn();
@@ -67,27 +82,6 @@ namespace USP.Utility
             {
                   returnTween?.Kill(false);
                   returnTween = null;
-            }
-            public void DragTo(Vector2 position)
-            {
-                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + DragOffset;
-                  Vector3 p = transform.position;
-
-                  if (!FreezeX && p.x != target.x) p.x = Mathf.SmoothDamp(p.x, target.x, ref velocity.x, SmoothTime);
-                  if (!FreezeY && p.y != target.y) p.y = Mathf.SmoothDamp(p.y, target.y, ref velocity.y, SmoothTime);
-
-                  transform.position = p;
-            }
-
-            private void HandlePick()
-            {
-                  CancelReturn();
-                  IsDragging = true;
-            }
-            private void HandleRelease()
-            {
-                  IsDragging = false;
-                  if (AutoReturnOnRelease) Return();
             }
 
             private Vector2 ClampTarget(Vector2 target)
