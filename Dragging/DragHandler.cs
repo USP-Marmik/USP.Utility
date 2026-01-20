@@ -6,22 +6,29 @@ namespace USP.Utility
       public sealed class DragHandler : MonoBehaviour
       {
             [Header("• R E F E R E N C E S")]
-            [SerializeField] private Camera cam;
+            [SerializeField] private new Camera camera;
 
-            [Header("• C O N F I G U R A T I O N")]
+            [Header("• I N P U T ")]
             [SerializeField] private InputAction position = new("Pointer Position", InputActionType.Value, "<Pointer>/position");
             [SerializeField] private InputAction press = new("Pointer Press", InputActionType.Button, "<Pointer>/press");
-            public ContactFilter2D Filter;
 
-            private readonly Collider2D[] hits = new Collider2D[3];
+            [Header("• C O N F I G U R A T I O N")]
+            public ContactFilter2D ContactFilter;
+            public int MaxResults = 3;
+
+            private Collider2D[] hitResults;
             private DraggableObject current;
 
-            private Vector2 WorldPosition => cam.ScreenToWorldPoint(position.ReadValue<Vector2>());
+            private Vector2 WorldPosition => camera.ScreenToWorldPoint(position.ReadValue<Vector2>());
 
 
             private void Reset()
             {
-                  cam = FindAnyObjectByType<Camera>();
+                  camera = FindAnyObjectByType<Camera>();
+            }
+            private void Awake()
+            {
+                  hitResults = new Collider2D[MaxResults];
             }
             private void OnEnable()
             {
@@ -33,15 +40,14 @@ namespace USP.Utility
             }
             private void LateUpdate()
             {
-                  if (current != null)
+                  if (current == null) return;
+
+                  if (!current.enabled)
                   {
-                        if (!current.enabled)
-                        {
-                              current = null;
-                              return;
-                        }
-                        current.DragTo(WorldPosition);
+                        current = null;
+                        return;
                   }
+                  current.DragTo(WorldPosition);
             }
             private void OnDisable()
             {
@@ -57,24 +63,25 @@ namespace USP.Utility
                   switch (context.phase)
                   {
                         case InputActionPhase.Started:
-                              int count = Physics2D.OverlapPoint(WorldPosition, Filter, hits);
-                              for (int i = 0; i < count; i++)
                               {
-                                    Collider2D collider = hits[i];
-                                    if (collider.TryGetComponent(out DraggableObject d) && d.enabled)
+                                    int count = Physics2D.OverlapPoint(WorldPosition, ContactFilter, hitResults);
+                                    for (int i = 0; i < count; i++)
                                     {
-                                          current = d;
-                                          current.Pick();
-                                          break;
+                                          var result = hitResults[i];
+                                          if (result.TryGetComponent(out DraggableObject obj) && obj.enabled)
+                                          {
+                                                (current = obj).Pick();
+                                                break;
+                                          }
                                     }
+                                    break;
                               }
-                              break;
-
                         case InputActionPhase.Canceled when current != null:
-                              current.Release();
-                              current = null;
-                              break;
-
+                              {
+                                    current.Release();
+                                    current = null;
+                                    break;
+                              }
                         default: return;
                   }
             }
