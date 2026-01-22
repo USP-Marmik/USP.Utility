@@ -60,7 +60,7 @@ namespace USP.Utility
             }
             public void DragTo(Vector2 position)
             {
-                  Vector2 target = (Confiner == null ? position : ClampTarget(position)) + PivotOffset;
+                  Vector2 target = (Confiner == null ? position + PivotOffset : ClampTarget(position + PivotOffset));
                   Vector3 p = transform.position;
 
                   if (!FreezeX && p.x != target.x)
