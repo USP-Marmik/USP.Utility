@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8885060694937250684}
   - component: {fileID: 1675405223479524411}
   m_Layer: 0
-  m_Name: Shining Stars
+  m_Name: VFX - Shining Stars
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
