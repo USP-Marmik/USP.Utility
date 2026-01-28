@@ -16,6 +16,15 @@ namespace USP.Minigame.Paula
 
             [SerializeField] private bool autoApplyOnStart = true;
 
+            public static bool IsWideAspect
+            {
+                  get
+                  {
+                        float aspect = (float) Screen.width / Screen.height;
+                        return aspect <= 1.29F || aspect >= 1.36F;
+                  }
+            }
+
 
             private void Reset()
             {
