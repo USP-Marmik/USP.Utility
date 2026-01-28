@@ -8,7 +8,6 @@ namespace USP.Utility
       public class ProgressBar : MonoBehaviour
       {
             [Header("• R E F E R E N C E S")]
-            [SerializeField] private Canvas canvas;
             [SerializeField] private Slider slider;
 
             public Vector2 VisiblePosition, HiddenPosition;
@@ -23,13 +22,13 @@ namespace USP.Utility
             private RectTransform rect;
             private Tween showTween, hideTween;
 
-            public bool IsVisible { get => canvas.enabled; set => canvas.enabled = value; }
+
+            public bool IsVisible { get; private set; }
             public float Progress { get => slider.normalizedValue; set => slider.normalizedValue = Mathf.Clamp01(value); }
 
 
             private void Reset()
             {
-                  canvas = GetComponentInParent<Canvas>();
                   slider = GetComponent<Slider>();
             }
             private void Awake()
