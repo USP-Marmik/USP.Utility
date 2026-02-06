@@ -8,11 +8,22 @@ namespace USP.Utility
       public class Icon : MonoBehaviour
       {
             [SerializeField] private Piece piece;
-            [SerializeField] private float pickScale = 1, placementScale = 1;
 
-            private Vector2 originalIconScale, originalPieceScale;
-            private Transform pieceTransform;
+            [Header("• C O N F I G U R A T I O N   -   I C O N")]
+            public float collapseDuration = 0.2F;
+            public Ease collapseEase = Ease.InSine;
+            public float restoreDuration = 0.2F;
+            public Ease restoreEase = Ease.OutBack;
+
+            [Header("• C O N F I G U R A T I O N   -   P I E C E")]
+            public float pieceScaleDuration = 0.37F;
+            public Ease pieceScaleEase = Ease.OutBack;
+            public float pickedScale = 1, placedScale = 1;
+
             private Sequence pickSequence, returnSequence;
+
+            private Transform pieceTransform;
+            private Vector2 originalIconScale, originalPieceScale;
 
 
             private void Reset()
@@ -22,7 +33,9 @@ namespace USP.Utility
             private void Awake()
             {
                   originalIconScale = transform.localScale;
-                  originalPieceScale = piece.transform.localScale;
+
+                  pieceTransform = piece.transform;
+                  originalPieceScale = pieceTransform.localScale;
             }
             private void OnEnable()
             {
@@ -43,8 +56,8 @@ namespace USP.Utility
             {
                   piece.transform.SetParent(null);
                   pickSequence ??= DOTween.Sequence()
-                        .Append(transform.DOScale(Vector2.zero, 0.2F).SetEase(Ease.InSine))
-                        .Join(pieceTransform.DOScale(Vector2.one * pickScale, 0.37F).SetEase(Ease.OutBack))
+                        .Append(transform.DOScale(Vector2.zero, collapseDuration).SetEase(collapseEase))
+                        .Join(pieceTransform.DOScale(Vector2.one * pickedScale, pieceScaleDuration).SetEase(pieceScaleEase))
                         .OnKill(() => pickSequence = null)
                         .SetAutoKill(false)
                         .Pause();
@@ -61,22 +74,17 @@ namespace USP.Utility
                         returnSequence?.Kill();
 
                         returnSequence = DOTween.Sequence()
-                              .Append(transform.DOScale(originalIconScale, 0.2F).SetEase(Ease.OutBack))
+                              .Append(transform.DOScale(originalIconScale, restoreDuration).SetEase(restoreEase))
                               .AppendCallback(() => pieceTransform.SetParent(transform, true))
                               .Append(pieceTransform.DOLocalMove(Vector2.zero, piece.attachDuration).SetEase(piece.attachEase))
-                              .Join(pieceTransform.DOScale(originalPieceScale, 0.2F).SetEase(Ease.InBack))
+                              .Join(pieceTransform.DOScale(originalPieceScale, pieceScaleDuration).SetEase(pieceScaleEase))
                               .OnKill(() => returnSequence = null)
                               .Play();
                   }
                   else
                   {
                         gameObject.SetActive(false);
-
-                        DOTween.Sequence()
-                              .Append(pieceTransform.DOLocalMove(Vector2.zero, piece.attachDuration))
-                              .Append(pieceTransform.DOScale(Vector2.one * placementScale, piece.attachDuration))
-                              .SetEase(piece.attachEase).SetLink(piece.gameObject)
-                              .Play();
+                        pieceTransform.DOScale(Vector2.one * placedScale, pieceScaleDuration).SetEase(pieceScaleEase).SetLink(gameObject);
                   }
             }
       }

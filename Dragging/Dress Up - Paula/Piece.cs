@@ -67,7 +67,7 @@ namespace USP.Utility
                   enabled = false;
 
                   transform.SetParent(slot.transform, true);
-                  transform.DOLocalMove(Vector2.zero, attachDuration).SetEase(attachEase).SetLink(gameObject);
+                  transform.DOLocalMove(Vector2.zero, attachDuration).SetEase(attachEase).SetLink(gameObject).OnComplete(() => slot.Fade(0F));
 
                   if (keySprite != null) renderer.sprite = keySprite;
                   renderer.sortingOrder = slot.Order + 1;

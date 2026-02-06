@@ -12,6 +12,7 @@ namespace USP.Utility
 
             [Header("• T W E E N   S E T T I N G S")]
             public float fadeDuration = 0.3F;
+            public Ease fadeEase = Ease.Linear;
 
             private Tweener maskTween;
 
@@ -25,17 +26,18 @@ namespace USP.Utility
                   var renderers = GetComponentsInChildren<SpriteRenderer>();
                   mask = renderers[0]; hint = renderers[1];
             }
-            private void OnEnable() => collider.enabled = hint.enabled = true;
+            private void OnEnable()
+            {
+                  collider.enabled = hint.enabled = true;
+            }
             private void OnDisable()
             {
                   collider.enabled = hint.enabled = false;
-
-                  Fade(0F);
             }
 
             public void Fade(float alpha)
             {
-                  maskTween ??= mask.DOColor(default, fadeDuration).SetAutoKill(false);
+                  maskTween ??= mask.DOColor(default, fadeDuration).SetEase(fadeEase).SetAutoKill(false);
                   Color c = mask.color;
                   c.a = Mathf.Clamp01(alpha);
                   maskTween.ChangeEndValue(c, true).Restart();
