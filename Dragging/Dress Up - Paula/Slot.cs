@@ -6,37 +6,39 @@ namespace USP.Utility
 {
       public class Slot : MonoBehaviour
       {
+            [Header("• R E F E R E N C E S")]
+            [SerializeField] private new Collider2D collider;
             [SerializeField] private SpriteRenderer mask, hint;
-            private Piece current;
-            private Tween maskTween;
+
+            [Header("• T W E E N   S E T T I N G S")]
+            public float fadeDuration = 0.3F;
+
+            private Tweener maskTween;
+
+            public string Key => hint.sprite.name;
+            public int Order => mask != null ? mask.sortingOrder : 0;
 
 
-            private void OnTriggerEnter2D(Collider2D collision)
+            private void Reset()
             {
-                  if (!collision.TryGetComponent(out Piece piece) || hint.sprite == null || hint.sprite.name != piece.Key) return;
-
-                  current = piece;
-                  current.OnRelease.AddListener(HandleRelease);
-
-                  FadeMask(0.5F);
+                  collider = GetComponent<Collider2D>();
+                  var renderers = GetComponentsInChildren<SpriteRenderer>();
+                  mask = renderers[0]; hint = renderers[1];
             }
-            private void OnTriggerExit2D(Collider2D collision)
+            private void OnEnable() => collider.enabled = hint.enabled = true;
+            private void OnDisable()
             {
-                  if (current == null || !collision.TryGetComponent(out Piece piece) || piece != current) return;
+                  collider.enabled = hint.enabled = false;
 
-                  FadeMask(current.IsLocked ? 0F : 1F);
-
-                  current.OnRelease.RemoveListener(HandleRelease);
-                  current = null;
+                  Fade(0F);
             }
 
-            private void HandleRelease() => current.Attach(transform, mask.sortingOrder + 1);
-            private void FadeMask(float alpha)
+            public void Fade(float alpha)
             {
-                  maskTween?.Kill();
+                  maskTween ??= mask.DOColor(default, fadeDuration).SetAutoKill(false);
                   Color c = mask.color;
-                  c.a = alpha;
-                  maskTween = mask.DOColor(c, 0.2F).OnComplete(() => maskTween = null);
+                  c.a = Mathf.Clamp01(alpha);
+                  maskTween.ChangeEndValue(c, true).Restart();
             }
       }
 }

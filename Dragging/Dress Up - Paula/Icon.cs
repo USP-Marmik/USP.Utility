@@ -8,9 +8,11 @@ namespace USP.Utility
       public class Icon : MonoBehaviour
       {
             [SerializeField] private Piece piece;
+            [SerializeField] private float pickScale = 1, placementScale = 1;
 
-            private Vector2 iconScale, pieceScale;
-            [SerializeField] private float overrideScale = 1F;
+            private Vector2 originalIconScale, originalPieceScale;
+            private Transform pieceTransform;
+            private Sequence pickSequence, returnSequence;
 
 
             private void Reset()
@@ -19,51 +21,63 @@ namespace USP.Utility
             }
             private void Awake()
             {
-                  iconScale = transform.localScale;
-                  pieceScale = piece.transform.localScale;
+                  originalIconScale = transform.localScale;
+                  originalPieceScale = piece.transform.localScale;
             }
             private void OnEnable()
             {
                   piece.enabled = true;
-
-                  piece.OnPick.AddListener(OnPick);
-                  piece.OnRelease.AddListener(OnRelease);
+                  piece.OnPick.AddListener(HandlePick);
+                  piece.OnRelease.AddListener(HandleRelease);
             }
             private void OnDisable()
             {
-                  piece.OnPick.RemoveListener(OnPick);
-                  piece.OnRelease.RemoveListener(OnRelease);
-
+                  piece.OnPick.RemoveListener(HandlePick);
+                  piece.OnRelease.RemoveListener(HandleRelease);
                   piece.enabled = false;
+
+                  pickSequence?.Kill(); returnSequence?.Kill();
             }
 
-            private void OnPick()
+            private void HandlePick()
             {
                   piece.transform.SetParent(null);
-
-                  transform.DOScale(Vector2.zero, 0.2F).SetEase(Ease.InSine);
-                  piece.transform.DOScale(overrideScale * Vector2.one, 0.25F).SetEase(Ease.InSine);
+                  pickSequence ??= DOTween.Sequence()
+                        .Append(transform.DOScale(Vector2.zero, 0.2F).SetEase(Ease.InSine))
+                        .Join(pieceTransform.DOScale(Vector2.one * pickScale, 0.37F).SetEase(Ease.OutBack))
+                        .OnKill(() => pickSequence = null)
+                        .SetAutoKill(false)
+                        .Pause();
+                  pickSequence.Restart();
             }
-            private void OnRelease() => StartCoroutine(HandleRelease());
-            private IEnumerator HandleRelease()
+            private void HandleRelease() => StartCoroutine(ReleaseRoutine());
+            private IEnumerator ReleaseRoutine()
             {
                   yield return new WaitForEndOfFrame();
 
-                  bool locked = piece.IsLocked;
-                  if (locked)
+                  if (piece.enabled)
                   {
-                        gameObject.SetActive(false);
-                        piece.transform.DOScale(Vector2.one, 0.3F).SetEase(Ease.OutSine);
+                        if (pickSequence != null && pickSequence.IsPlaying()) pickSequence.Pause();
+                        returnSequence?.Kill();
+
+                        returnSequence = DOTween.Sequence()
+                              .Append(transform.DOScale(originalIconScale, 0.2F).SetEase(Ease.OutBack))
+                              .AppendCallback(() => pieceTransform.SetParent(transform, true))
+                              .Append(pieceTransform.DOLocalMove(Vector2.zero, piece.attachDuration).SetEase(piece.attachEase))
+                              .Join(pieceTransform.DOScale(originalPieceScale, 0.2F).SetEase(Ease.InBack))
+                              .OnKill(() => returnSequence = null)
+                              .Play();
                   }
                   else
-                        transform
-                              .DOScale(iconScale, 0.2F)
-                              .SetEase(Ease.OutBack)
-                              .OnComplete(() => DOTween.Sequence()
-                              .AppendCallback(() => piece.transform.SetParent(transform, true))
-                              .Append(piece.transform.DOLocalMove(Vector2.zero, 0.2F).SetEase(Ease.InOutSine))
-                              .Join(piece.transform.DOScale(pieceScale, 0.3F).SetEase(Ease.OutSine))
-                              .Play());
+                  {
+                        gameObject.SetActive(false);
+
+                        DOTween.Sequence()
+                              .Append(pieceTransform.DOLocalMove(Vector2.zero, piece.attachDuration))
+                              .Append(pieceTransform.DOScale(Vector2.one * placementScale, piece.attachDuration))
+                              .SetEase(piece.attachEase).SetLink(piece.gameObject)
+                              .Play();
+                  }
             }
       }
 }
