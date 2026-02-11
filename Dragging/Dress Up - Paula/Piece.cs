@@ -1,7 +1,8 @@
-﻿using DG.Tweening;
+﻿using System;
 
 using UnityEngine;
-using UnityEngine.Events;
+
+using DG.Tweening;
 
 namespace USP.Utility
 {
@@ -12,17 +13,26 @@ namespace USP.Utility
             [SerializeField] private new SpriteRenderer renderer;
             [SerializeField] private new Collider2D collider;
             [SerializeField] private DraggableObject draggable;
+            private new Transform transform;
             [SerializeField] private Sprite keySprite;
 
             [Header("• T W E E N   S E T T I N G S")]
-            [Min(0f)] public float attachDuration = 0.25F;
-            public Ease attachEase = Ease.InOutSine;
+            public float embiggenTarget = 1;
+            [Min(0F)] public float embiggenTweenDuration = 0.3F;
+            public Ease embiggenTweenEase = Ease.OutBack;
 
+            private Tween embiggenTween;
+
+            [Space(2F)]
+            public float attachTweenScaleTarget = 1F;
+            [Min(0F)] public float attachTweenMoveDuration = 0.25F, attachTweenScaleDuration = 0.5F;
+            public Ease attachTweenMoveEase = Ease.InOutQuint, attachTweenScaleEase = Ease.OutBounce;
+
+            private string key;
             private Slot matchingSlot;
 
-            public UnityEvent OnPick => draggable.OnPick;
-            public UnityEvent OnRelease => draggable.OnRelease;
-            public string PieceKey => keySprite != null ? keySprite.name : renderer.sprite.name;
+
+            public event Action Selected = delegate { }, Canceled = delegate { }, Attached = delegate { };
 
 
             private void Reset()
@@ -31,48 +41,81 @@ namespace USP.Utility
                   collider = GetComponent<Collider2D>();
                   draggable = GetComponent<DraggableObject>();
             }
+            private void Awake()
+            {
+                  transform = base.transform;
+
+                  key = keySprite != null ? keySprite.name : renderer.sprite.name;
+            }
             private void OnEnable()
             {
                   draggable.enabled = collider.enabled = true;
-                  draggable.OnRelease.AddListener(HandleRelease);
+
+                  draggable.OnPick.AddListener(HandleSelected);
+                  draggable.OnRelease.AddListener(HandleReleased);
+
+                  embiggenTween = transform.DOScale(Vector2.one * embiggenTarget, embiggenTweenDuration)
+                        .SetEase(embiggenTweenEase)
+                        .SetAutoKill(false)
+                        .OnKill(() => embiggenTween = null)
+                        .Pause();
             }
             private void OnDisable()
             {
+                  draggable.OnPick.RemoveListener(HandleSelected);
+                  draggable.OnRelease.RemoveListener(HandleReleased);
+
                   draggable.enabled = collider.enabled = false;
-                  draggable.OnRelease.RemoveListener(HandleRelease);
+
+                  embiggenTween?.Kill();
             }
             private void OnTriggerEnter2D(Collider2D other)
             {
-                  if (other.TryGetComponent(out Slot slot) && PieceKey == slot.Key)
-                  {
-                        slot.Fade(0.5F);
-                        matchingSlot = slot;
-                  }
+                  if (!other.TryGetComponent(out Slot slot) || key != slot.Key) return;
+
+                  slot.Fade(0.5F);
+                  matchingSlot = slot;
             }
             private void OnTriggerExit2D(Collider2D other)
             {
-                  if (other.TryGetComponent(out Slot slot) && PieceKey == slot.Key)
-                  {
-                        slot.Fade(1F);
-                        matchingSlot = null;
-                  }
+                  if (!other.TryGetComponent(out Slot slot) || key != slot.Key) return;
+
+                  if (enabled) slot.Fade(1F);
+                  matchingSlot = null;
             }
 
-            private void HandleRelease()
+            private void HandleSelected()
             {
-                  if (matchingSlot != null) Attach(matchingSlot);
+                  embiggenTween.Restart();
+
+                  Selected();
             }
-            private void Attach(Slot slot)
+            private void HandleReleased()
+            {
+                  if (matchingSlot != null)
+                  {
+                        AttachToSlot(matchingSlot);
+                        return;
+                  }
+                  embiggenTween.SmoothRewind();
+
+                  Canceled();
+            }
+            private void AttachToSlot(Slot slot)
             {
                   enabled = false;
 
                   transform.SetParent(slot.transform, true);
-                  transform.DOLocalMove(Vector2.zero, attachDuration).SetEase(attachEase).SetLink(gameObject).OnComplete(() => slot.Fade(0F));
 
-                  if (keySprite != null) renderer.sprite = keySprite;
+                  DOTween.Sequence()
+                        .Append(transform.DOLocalMove(Vector2.zero, attachTweenMoveDuration).SetEase(attachTweenMoveEase).OnComplete(() => slot.Fade(0F)))
+                        .AppendCallback(() => { if (keySprite != null) renderer.sprite = keySprite; })
+                        .Append(transform.DOScale(Vector2.one * attachTweenScaleTarget, attachTweenScaleDuration).SetEase(attachTweenScaleEase))
+                        .SetLink(gameObject)
+                        .Play();
+
                   renderer.sortingOrder = slot.Order + 1;
-
-                  slot.enabled = false;
+                  Attached();
             }
       }
 }

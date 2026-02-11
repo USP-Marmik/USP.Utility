@@ -1,29 +1,26 @@
-using System.Collections;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace USP.Utility
 {
       [RequireComponent(typeof(SpriteRenderer))]
       public class Icon : MonoBehaviour
       {
+            [Header("• R E F E R E N C E S")]
             [SerializeField] private Piece piece;
 
             [Header("• C O N F I G U R A T I O N   -   I C O N")]
-            public float collapseDuration = 0.2F;
-            public Ease collapseEase = Ease.InSine;
-            public float restoreDuration = 0.2F;
-            public Ease restoreEase = Ease.OutBack;
+            public float collapseDuration = 0.5F;
+            public Ease collapseEase = Ease.InBack;
 
-            [Header("• C O N F I G U R A T I O N   -   P I E C E")]
-            public float pieceScaleDuration = 0.37F;
-            public Ease pieceScaleEase = Ease.OutBack;
-            public float pickedScale = 1, placedScale = 1;
+            [Header("• E V E N T S")]
+            public UnityEvent OnCollapse;
+            public UnityEvent OnExpand;
+            public UnityEvent OnHide;
 
-            private Sequence pickSequence, returnSequence;
-
-            private Transform pieceTransform;
-            private Vector2 originalIconScale, originalPieceScale;
+            private new Transform transform;
+            private Tween collapseTween;
 
 
             private void Reset()
@@ -32,60 +29,47 @@ namespace USP.Utility
             }
             private void Awake()
             {
-                  originalIconScale = transform.localScale;
-
-                  pieceTransform = piece.transform;
-                  originalPieceScale = pieceTransform.localScale;
+                  transform = base.transform;
             }
             private void OnEnable()
             {
                   piece.enabled = true;
-                  piece.OnPick.AddListener(HandlePick);
-                  piece.OnRelease.AddListener(HandleRelease);
+
+                  piece.Selected += Collapse;
+                  piece.Canceled += Expand;
+                  piece.Attached += Hide;
+
+                  collapseTween = transform.DOScale(Vector2.zero, collapseDuration)
+                        .SetEase(collapseEase)
+                        .SetAutoKill(false)
+                        .OnKill(() => collapseTween = null)
+                        .Pause();
             }
             private void OnDisable()
             {
-                  piece.OnPick.RemoveListener(HandlePick);
-                  piece.OnRelease.RemoveListener(HandleRelease);
+                  piece.Selected -= Collapse;
+                  piece.Canceled -= Expand;
+                  piece.Attached -= Hide;
+
                   piece.enabled = false;
 
-                  pickSequence?.Kill(); returnSequence?.Kill();
+                  collapseTween?.Kill();
             }
 
-            private void HandlePick()
+            private void Collapse()
             {
-                  piece.transform.SetParent(null);
-                  pickSequence ??= DOTween.Sequence()
-                        .Append(transform.DOScale(Vector2.zero, collapseDuration).SetEase(collapseEase))
-                        .Join(pieceTransform.DOScale(Vector2.one * pickedScale, pieceScaleDuration).SetEase(pieceScaleEase))
-                        .OnKill(() => pickSequence = null)
-                        .SetAutoKill(false)
-                        .Pause();
-                  pickSequence.Restart();
+                  collapseTween.Restart();
+                  OnCollapse.Invoke();
             }
-            private void HandleRelease() => StartCoroutine(ReleaseRoutine());
-            private IEnumerator ReleaseRoutine()
+            private void Expand()
             {
-                  yield return new WaitForEndOfFrame();
-
-                  if (piece.enabled)
-                  {
-                        if (pickSequence != null && pickSequence.IsPlaying()) pickSequence.Pause();
-                        returnSequence?.Kill();
-
-                        returnSequence = DOTween.Sequence()
-                              .Append(transform.DOScale(originalIconScale, restoreDuration).SetEase(restoreEase))
-                              .AppendCallback(() => pieceTransform.SetParent(transform, true))
-                              .Append(pieceTransform.DOLocalMove(Vector2.zero, piece.attachDuration).SetEase(piece.attachEase))
-                              .Join(pieceTransform.DOScale(originalPieceScale, pieceScaleDuration).SetEase(pieceScaleEase))
-                              .OnKill(() => returnSequence = null)
-                              .Play();
-                  }
-                  else
-                  {
-                        gameObject.SetActive(false);
-                        pieceTransform.DOScale(Vector2.one * placedScale, pieceScaleDuration).SetEase(pieceScaleEase).SetLink(gameObject);
-                  }
+                  collapseTween.PlayBackwards();
+                  OnExpand.Invoke();
+            }
+            private void Hide()
+            {
+                  gameObject.SetActive(false);
+                  OnHide.Invoke();
             }
       }
 }
