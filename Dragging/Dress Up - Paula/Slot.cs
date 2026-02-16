@@ -11,13 +11,12 @@ namespace USP.Utility
             [SerializeField] private new Collider2D collider;
             [SerializeField] private SpriteRenderer mask, hint;
 
-            private Color originalMaskColor;
-
             [Header("• T W E E N   S E T T I N G S")]
-            public float fadeDuration = 0.37F;
-            public Ease fadeEase = Ease.OutCubic;
-
+            public float fadeTweenDuration = 0.37F;
+            public Ease fadeTweenEase = Ease.OutCubic;
             private Tweener fadeTween;
+            public Color fadeTarget = Color.white;
+            private Color originalMaskColor;
 
             public string Key => hint.sprite.name;
             public int Order => mask != null ? mask.sortingOrder : 0;
@@ -28,6 +27,7 @@ namespace USP.Utility
                   collider = GetComponent<Collider2D>();
                   var renderers = GetComponentsInChildren<SpriteRenderer>();
                   mask = renderers[0]; hint = renderers[1];
+                  hint.name = "Hint - " + Key;
             }
             private void Awake()
             {
@@ -35,9 +35,9 @@ namespace USP.Utility
             }
             private void OnEnable()
             {
-                  fadeTween = mask.DOColor(default, fadeDuration).SetEase(fadeEase).SetAutoKill(false).Pause();
-
                   collider.enabled = hint.enabled = true;
+
+                  fadeTween = mask.DOColor(default, fadeTweenDuration).SetEase(fadeTweenEase).SetAutoKill(false).Pause();
             }
             private void OnDisable()
             {
@@ -48,7 +48,7 @@ namespace USP.Utility
 
             public void Fade(float alpha)
             {
-                  Color color = alpha == 1F ? originalMaskColor : Color.white;
+                  Color color = alpha == 1F ? originalMaskColor : fadeTarget;
                   color.a = Mathf.Clamp01(alpha);
 
                   fadeTween.ChangeEndValue(color, true).Restart();

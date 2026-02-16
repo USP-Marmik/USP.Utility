@@ -6,6 +6,7 @@ using DG.Tweening;
 
 namespace USP.Utility
 {
+      [RequireComponent(typeof(Collider2D))]
       [RequireComponent(typeof(SpriteRenderer), typeof(DraggableObject), typeof(Rigidbody2D))]
       public class Piece : MonoBehaviour
       {
@@ -13,24 +14,26 @@ namespace USP.Utility
             [SerializeField] private new SpriteRenderer renderer;
             [SerializeField] private new Collider2D collider;
             [SerializeField] private DraggableObject draggable;
-            private new Transform transform;
             [SerializeField] private Sprite keySprite;
+            private new Transform transform;
+
+            private int originalOrder;
+            private string key;
+
+            private Slot matchingSlot;
 
             [Header("• T W E E N   S E T T I N G S")]
             public float embiggenTarget = 1;
             [Min(0F)] public float embiggenTweenDuration = 0.3F;
-            public Ease embiggenTweenEase = Ease.OutBack;
-
+            public Ease embiggenTweenEase = Ease.InOutBack;
             private Tween embiggenTween;
-
             [Space(2F)]
             public float attachTweenScaleTarget = 1F;
             [Min(0F)] public float attachTweenMoveDuration = 0.25F, attachTweenScaleDuration = 0.5F;
             public Ease attachTweenMoveEase = Ease.InOutQuint, attachTweenScaleEase = Ease.OutBounce;
 
-            private string key;
-            private Slot matchingSlot;
-
+            public bool Interactable { get => collider.enabled; set => collider.enabled = value; }
+            public bool IsAttached { get; private set; }
 
             public event Action Selected = delegate { }, Canceled = delegate { }, Attached = delegate { };
 
@@ -45,6 +48,7 @@ namespace USP.Utility
             {
                   transform = base.transform;
 
+                  originalOrder = renderer.sortingOrder;
                   key = keySprite != null ? keySprite.name : renderer.sprite.name;
             }
             private void OnEnable()
@@ -53,17 +57,15 @@ namespace USP.Utility
 
                   draggable.OnPick.AddListener(HandleSelected);
                   draggable.OnRelease.AddListener(HandleReleased);
+                  draggable.OnReturn.AddListener(HandleReturn);
 
-                  embiggenTween = transform.DOScale(Vector2.one * embiggenTarget, embiggenTweenDuration)
-                        .SetEase(embiggenTweenEase)
-                        .SetAutoKill(false)
-                        .OnKill(() => embiggenTween = null)
-                        .Pause();
+                  embiggenTween = transform.DOScale(Vector2.one * embiggenTarget, embiggenTweenDuration).SetEase(embiggenTweenEase).SetAutoKill(false).OnKill(() => embiggenTween = null).Pause();
             }
             private void OnDisable()
             {
                   draggable.OnPick.RemoveListener(HandleSelected);
                   draggable.OnRelease.RemoveListener(HandleReleased);
+                  draggable.OnReturn.RemoveListener(HandleReturn);
 
                   draggable.enabled = collider.enabled = false;
 
@@ -80,14 +82,14 @@ namespace USP.Utility
             {
                   if (!other.TryGetComponent(out Slot slot) || key != slot.Key) return;
 
-                  if (enabled) slot.Fade(1F);
+                  if (!IsAttached) slot.Fade(1F);
                   matchingSlot = null;
             }
 
             private void HandleSelected()
             {
+                  renderer.sortingOrder = 200;
                   embiggenTween.Restart();
-
                   Selected();
             }
             private void HandleReleased()
@@ -98,23 +100,30 @@ namespace USP.Utility
                         return;
                   }
                   embiggenTween.SmoothRewind();
-
                   Canceled();
+            }
+            private void HandleReturn()
+            {
+                  renderer.sortingOrder = originalOrder;
             }
             private void AttachToSlot(Slot slot)
             {
+                  IsAttached = true;
                   enabled = false;
 
                   transform.SetParent(slot.transform, true);
 
                   DOTween.Sequence()
                         .Append(transform.DOLocalMove(Vector2.zero, attachTweenMoveDuration).SetEase(attachTweenMoveEase).OnComplete(() => slot.Fade(0F)))
-                        .AppendCallback(() => { if (keySprite != null) renderer.sprite = keySprite; })
+                        .AppendCallback(() =>
+                        {
+                              if (keySprite != null) renderer.sprite = keySprite;
+                              renderer.sortingOrder = slot.Order + 1;
+                        })
                         .Append(transform.DOScale(Vector2.one * attachTweenScaleTarget, attachTweenScaleDuration).SetEase(attachTweenScaleEase))
                         .SetLink(gameObject)
                         .Play();
 
-                  renderer.sortingOrder = slot.Order + 1;
                   Attached();
             }
       }

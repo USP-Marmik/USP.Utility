@@ -1,35 +1,34 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace USP.Utility
 {
       [RequireComponent(typeof(SpriteRenderer))]
-      public class Icon : MonoBehaviour
+      public class Icon : MonoBehaviour, IPointerDownHandler
       {
             [Header("• R E F E R E N C E S")]
             [SerializeField] private Piece piece;
 
-            [Header("• C O N F I G U R A T I O N   -   I C O N")]
-            public float collapseDuration = 0.5F;
-            public Ease collapseEase = Ease.InBack;
+            [Header("• T W E E N   S E T T I N G S")]
+            public float collapseTweenDuration = 0.5F;
+            public Ease collapseTweenEase = Ease.InBack;
+            private Tween collapseTween;
+            [Space(2F)]
+            public float punchTarget = 0.2F;
+            public float punchTweenDuration = 0.25F;
+            private Tween punchTween;
 
             [Header("• E V E N T S")]
             public UnityEvent OnCollapse;
             public UnityEvent OnExpand;
             public UnityEvent OnHide;
 
-            private new Transform transform;
-            private Tween collapseTween;
-
 
             private void Reset()
             {
                   piece = GetComponentInChildren<Piece>();
-            }
-            private void Awake()
-            {
-                  transform = base.transform;
             }
             private void OnEnable()
             {
@@ -39,11 +38,13 @@ namespace USP.Utility
                   piece.Canceled += Expand;
                   piece.Attached += Hide;
 
-                  collapseTween = transform.DOScale(Vector2.zero, collapseDuration)
-                        .SetEase(collapseEase)
+                  collapseTween = transform.DOScale(Vector2.zero, collapseTweenDuration)
+                        .SetEase(collapseTweenEase)
                         .SetAutoKill(false)
                         .OnKill(() => collapseTween = null)
                         .Pause();
+
+                  punchTween = transform.DOPunchScale(Vector2.one * punchTarget, punchTweenDuration, 1, 1F).SetRelative().SetAutoKill(false).OnKill(() => punchTween = null).Pause();
             }
             private void OnDisable()
             {
@@ -54,6 +55,12 @@ namespace USP.Utility
                   piece.enabled = false;
 
                   collapseTween?.Kill();
+                  punchTween?.Kill();
+            }
+
+            public void OnPointerDown(PointerEventData _)
+            {
+                  if (!piece.Interactable) punchTween.Restart();
             }
 
             private void Collapse()
