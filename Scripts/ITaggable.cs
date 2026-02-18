@@ -1,6 +1,6 @@
 using System;
 
-namespace USP
+namespace USP.Utility
 {
       public interface ITaggable
       {

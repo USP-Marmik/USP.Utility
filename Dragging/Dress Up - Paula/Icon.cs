@@ -1,7 +1,7 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using DG.Tweening;
 
 namespace USP.Utility
 {

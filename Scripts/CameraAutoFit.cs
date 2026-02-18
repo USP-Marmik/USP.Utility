@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace USP.Minigame.Paula
+namespace USP.Utility
 {
       [RequireComponent(typeof(Camera))]
       public class CameraAutoFit : MonoBehaviour

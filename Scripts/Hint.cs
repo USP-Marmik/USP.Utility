@@ -2,7 +2,7 @@ using DG.Tweening;
 
 using UnityEngine;
 
-namespace USP.Minigame.Paula
+namespace USP.Utility
 {
       public class Hint : MonoBehaviour
       {
