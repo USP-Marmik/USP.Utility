@@ -11,11 +11,12 @@ namespace USP.Utility
             [SerializeField] private SpriteRenderer mask, hint;
 
             [Header("• T W E E N   S E T T I N G S")]
+            public Color fadeTarget = Color.white;
             public float fadeTweenDuration = 0.37F;
             public Ease fadeTweenEase = Ease.OutCubic;
-            private Tweener fadeTween;
-            public Color fadeTarget = Color.white;
+
             private Color originalMaskColor;
+            private Tweener fadeTween;
 
             public string Key => hint.sprite.name;
             public int Order => mask != null ? mask.sortingOrder : 0;
@@ -35,13 +36,11 @@ namespace USP.Utility
             private void OnEnable()
             {
                   collider.enabled = hint.enabled = true;
-
-                  fadeTween = mask.DOColor(default, fadeTweenDuration).SetEase(fadeTweenEase).SetAutoKill(false).Pause();
+                  fadeTween = mask.DOColor(default, fadeTweenDuration).SetEase(fadeTweenEase).OnKill(() => fadeTween = null).SetAutoKill(false).Pause();
             }
             private void OnDisable()
             {
                   collider.enabled = hint.enabled = false;
-
                   fadeTween?.Kill();
             }
 
@@ -49,7 +48,6 @@ namespace USP.Utility
             {
                   Color color = alpha == 1F ? originalMaskColor : fadeTarget;
                   color.a = Mathf.Clamp01(alpha);
-
                   fadeTween.ChangeEndValue(color, true).Restart();
             }
       }

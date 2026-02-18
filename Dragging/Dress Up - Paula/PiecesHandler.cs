@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using USP.Utility;
+using UnityEngine.Events;
 
-namespace USP.Minigame.Paula
+namespace USP.Utility
 {
       [RequireComponent(typeof(AudioSource))]
       public class PiecesHandler : MonoBehaviour
@@ -11,15 +11,20 @@ namespace USP.Minigame.Paula
             [Header("A U D I O")]
             [SerializeField] private AudioSource voiceSource;
             [SerializeField] private AudioClip[] voiceOverClips;
-            private Action[] playVoiceOverHandlers;
 
             [Header("G A M E P L A Y")]
             [SerializeField] private Piece[] pieces;
             [SerializeField] private Hint hint;
             [SerializeField] private float hintInterval = 4F;
 
+            [Header("E V E N T S")]
+            public UnityEvent OnAssemblyComplete;
+
+            private Action[] attachHandlers;
+            private Coroutine voiceOverGateRoutine;
             private float idleTime;
-            private Coroutine voiceOverRoutine;
+            private int attachedCount;
+
 
             private Vector3 GetRandomUnattachedPiecePosition
             {
@@ -39,32 +44,37 @@ namespace USP.Minigame.Paula
             }
             private void OnEnable()
             {
-                  playVoiceOverHandlers = new Action[pieces.Length];
+                  idleTime = 0F;
+                  hint.enabled = true;
+
+                  attachHandlers = new Action[pieces.Length];
                   for (int i = 0; i < pieces.Length; i++)
                   {
                         int index = i;
-                        playVoiceOverHandlers[index] = () => PlayVO(index);
-                        Piece piece = pieces[index];
-                        piece.Attached += playVoiceOverHandlers[index];
-                        piece.Selected += ResetIdleTime;
+                        attachHandlers[index] = () => PlayVO(index);
+
+                        Piece piece = pieces[i];
+                        piece.OnAttach += attachHandlers[i];
+                        piece.OnSelect += ResetIdleTime;
                   }
             }
             private void OnDisable()
             {
-                  if (playVoiceOverHandlers != null)
+                  if (attachHandlers != null)
                   {
                         for (int i = 0; i < pieces.Length; i++)
                         {
                               Piece piece = pieces[i];
-                              piece.Attached -= playVoiceOverHandlers[i];
-                              piece.Selected -= ResetIdleTime;
+                              piece.OnAttach -= attachHandlers[i];
+                              piece.OnSelect -= ResetIdleTime;
                         }
                   }
-                  if (voiceOverRoutine != null)
+                  if (voiceOverGateRoutine != null)
                   {
-                        StopCoroutine(voiceOverRoutine);
-                        voiceOverRoutine = null;
+                        StopCoroutine(voiceOverGateRoutine);
+                        voiceOverGateRoutine = null;
                   }
+                  hint.enabled = false;
             }
             private void Update()
             {
@@ -79,21 +89,24 @@ namespace USP.Minigame.Paula
 
             public void PlayVO(int index)
             {
-                  if (voiceOverRoutine != null)
+                  if (voiceOverGateRoutine != null)
                   {
-                        StopCoroutine(voiceOverRoutine);
+                        StopCoroutine(voiceOverGateRoutine);
                         voiceSource.Stop();
                   }
                   var clip = voiceOverClips[index];
                   voiceSource.PlayOneShot(clip);
-                  voiceOverRoutine = StartCoroutine(WaitForClipLength(clip));
+                  voiceOverGateRoutine = StartCoroutine(WaitForClipLength(clip));
             }
             private IEnumerator WaitForClipLength(AudioClip clip)
             {
+                  attachedCount++;
                   SetInteractable(false);
                   yield return new WaitForSeconds(clip.length);
                   SetInteractable(true);
-                  voiceOverRoutine = null;
+
+                  if (attachedCount == pieces.Length) OnAssemblyComplete.Invoke();
+                  voiceOverGateRoutine = null;
             }
 
             private void ResetIdleTime()
@@ -106,8 +119,7 @@ namespace USP.Minigame.Paula
                   for (int i = 0; i < pieces.Length; i++)
                   {
                         Piece piece = pieces[i];
-
-                        if (!piece.IsAttached) piece.Interactable = value;
+                       if (!piece.IsAttached) piece.IsDraggable = value;
                   }
             }
       }

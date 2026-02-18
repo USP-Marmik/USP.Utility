@@ -34,9 +34,9 @@ namespace USP.Utility
             {
                   piece.enabled = true;
 
-                  piece.Selected += Collapse;
-                  piece.Canceled += Expand;
-                  piece.Attached += Hide;
+                  piece.OnSelect += Collapse;
+                  piece.OnCancel += Expand;
+                  piece.OnAttach += Hide;
 
                   collapseTween = transform.DOScale(Vector2.zero, collapseTweenDuration)
                         .SetEase(collapseTweenEase)
@@ -48,9 +48,9 @@ namespace USP.Utility
             }
             private void OnDisable()
             {
-                  piece.Selected -= Collapse;
-                  piece.Canceled -= Expand;
-                  piece.Attached -= Hide;
+                  piece.OnSelect -= Collapse;
+                  piece.OnCancel -= Expand;
+                  piece.OnAttach -= Hide;
 
                   piece.enabled = false;
 
@@ -60,7 +60,7 @@ namespace USP.Utility
 
             public void OnPointerDown(PointerEventData _)
             {
-                  if (!piece.Interactable) punchTween.Restart();
+                  if (!piece.IsDraggable) punchTween.Restart();
             }
 
             private void Collapse()

@@ -15,10 +15,9 @@ namespace USP.Utility
             [SerializeField] private Sprite keySprite;
             private new Transform transform;
 
-            private int originalOrder;
-            private string key;
-
             private Slot matchingSlot;
+            private string key;
+            private int originalSortingOrder;
 
             [Header("• T W E E N   S E T T I N G S")]
             public float embiggenTarget = 1;
@@ -30,10 +29,10 @@ namespace USP.Utility
             [Min(0F)] public float attachTweenMoveDuration = 0.25F, attachTweenScaleDuration = 0.5F;
             public Ease attachTweenMoveEase = Ease.InOutQuint, attachTweenScaleEase = Ease.OutBounce;
 
-            public bool Interactable { get => collider.enabled; set => collider.enabled = value; }
+            public bool IsDraggable { get => draggable.enabled; set => draggable.enabled = value; }
             public bool IsAttached { get; private set; }
 
-            public event Action Selected = delegate { }, Canceled = delegate { }, Attached = delegate { };
+            public event Action OnSelect = delegate { }, OnCancel = delegate { }, OnAttach = delegate { };
 
 
             private void Reset()
@@ -46,12 +45,13 @@ namespace USP.Utility
             {
                   transform = base.transform;
 
-                  originalOrder = renderer.sortingOrder;
+                  originalSortingOrder = renderer.sortingOrder;
                   key = keySprite != null ? keySprite.name : renderer.sprite.name;
             }
             private void OnEnable()
             {
-                  draggable.enabled = collider.enabled = true;
+                  IsAttached = false;
+                  draggable.enabled = collider.enabled = IsDraggable = true;
 
                   draggable.OnPick.AddListener(HandleSelected);
                   draggable.OnRelease.AddListener(HandleReleased);
@@ -65,7 +65,7 @@ namespace USP.Utility
                   draggable.OnRelease.RemoveListener(HandleReleased);
                   draggable.OnReturn.RemoveListener(HandleReturn);
 
-                  draggable.enabled = collider.enabled = false;
+                  draggable.enabled = collider.enabled = IsDraggable = false;
 
                   embiggenTween?.Kill();
             }
@@ -88,7 +88,8 @@ namespace USP.Utility
             {
                   renderer.sortingOrder = 200;
                   embiggenTween.Restart();
-                  Selected();
+
+                  OnSelect();
             }
             private void HandleReleased()
             {
@@ -97,17 +98,19 @@ namespace USP.Utility
                         AttachToSlot(matchingSlot);
                         return;
                   }
-                  embiggenTween.SmoothRewind();
-                  Canceled();
+                  embiggenTween.PlayBackwards();
+
+                  OnCancel();
             }
             private void HandleReturn()
             {
-                  renderer.sortingOrder = originalOrder;
+                  renderer.sortingOrder = originalSortingOrder;
             }
+
             private void AttachToSlot(Slot slot)
             {
-                  IsAttached = true;
                   enabled = false;
+                  IsAttached = true;
 
                   transform.SetParent(slot.transform, true);
 
@@ -122,7 +125,7 @@ namespace USP.Utility
                         .SetLink(gameObject)
                         .Play();
 
-                  Attached();
+                  OnAttach();
             }
       }
 }
