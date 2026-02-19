@@ -109,10 +109,9 @@ namespace USP.Utility
 
             private void AttachToSlot(Slot slot)
             {
-                  enabled = false;
                   IsAttached = true;
-
                   transform.SetParent(slot.transform, true);
+                  OnAttach();
 
                   DOTween.Sequence()
                         .Append(transform.DOLocalMove(Vector2.zero, attachTweenMoveDuration).SetEase(attachTweenMoveEase).OnComplete(() => slot.Fade(0F)))
@@ -125,7 +124,7 @@ namespace USP.Utility
                         .SetLink(gameObject)
                         .Play();
 
-                  OnAttach();
+                  enabled = false;
             }
       }
 }
