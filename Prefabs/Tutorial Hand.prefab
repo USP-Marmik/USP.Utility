@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8508442333129563063}
   - component: {fileID: 3944600845169340122}
-  - component: {fileID: 7727503568411143614}
+  - component: {fileID: 8906355225871892676}
   m_Layer: 0
   m_Name: Tutorial Hand
   m_TagString: Untagged
@@ -91,7 +91,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &7727503568411143614
+--- !u!114 &8906355225871892676
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -100,12 +100,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 6210843063307432478}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02073f2f6c0b90642bc7454a1109015e, type: 3}
+  m_Script: {fileID: 11500000, guid: d454740a15de1d84685f1cb673739a11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::USP.Minigame.Paula.Hint
+  m_EditorClassIdentifier: Assembly-CSharp::USP.Utility.Hint
   visibilityDuration: 0.2
   visibilityEase: 27
   moveDelay: 0.4
   moveDuration: 1
   moveEase: 19
-  targetPosition: {x: 0, y: -0.5, z: 0}
+  <Target>k__BackingField: {x: 0, y: 0, z: 0}

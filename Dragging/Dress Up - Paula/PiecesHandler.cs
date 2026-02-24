@@ -14,7 +14,6 @@ namespace USP.Utility
 
             [Header("G A M E P L A Y")]
             [SerializeField] private Piece[] pieces;
-            [SerializeField] private Hint hint;
             [SerializeField] private float hintInterval = 4F;
 
             [Header("E V E N T S")]
@@ -26,18 +25,6 @@ namespace USP.Utility
             private int attachedCount;
 
 
-            private Vector3 GetRandomUnattachedPiecePosition
-            {
-                  get
-                  {
-                        var available = Array.FindAll(pieces, p => !p.IsAttached);
-                        if (available.Length == 0) return Vector3.zero;
-                        var selected = available[UnityEngine.Random.Range(0, available.Length)];
-                        return selected.transform.position;
-                  }
-            }
-
-
             private void Reset()
             {
                   voiceSource = GetComponent<AudioSource>();
@@ -45,7 +32,6 @@ namespace USP.Utility
             private void OnEnable()
             {
                   idleTime = 0F;
-                  hint.enabled = true;
 
                   attachHandlers = new Action[pieces.Length];
                   for (int i = 0; i < pieces.Length; i++)
@@ -74,7 +60,6 @@ namespace USP.Utility
                         StopCoroutine(voiceOverGateRoutine);
                         voiceOverGateRoutine = null;
                   }
-                  hint.enabled = false;
             }
             private void Update()
             {
@@ -82,7 +67,6 @@ namespace USP.Utility
                   if (idleTime < hintInterval) idleTime += Time.deltaTime;
                   else
                   {
-                        hint.Show(GetRandomUnattachedPiecePosition);
                         idleTime = 0F;
                   }
             }
@@ -108,18 +92,16 @@ namespace USP.Utility
                   if (attachedCount == pieces.Length) OnAssemblyComplete.Invoke();
                   voiceOverGateRoutine = null;
             }
-
             private void ResetIdleTime()
             {
                   idleTime = 0;
-                  hint.Hide();
             }
             private void SetInteractable(bool value)
             {
                   for (int i = 0; i < pieces.Length; i++)
                   {
                         Piece piece = pieces[i];
-                       if (!piece.IsAttached) piece.IsDraggable = value;
+                        if (!piece.IsAttached) piece.IsDraggable = value;
                   }
             }
       }

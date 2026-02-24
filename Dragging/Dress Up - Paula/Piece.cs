@@ -50,14 +50,14 @@ namespace USP.Utility
             }
             private void OnEnable()
             {
-                  IsAttached = false;
-                  draggable.enabled = collider.enabled = IsDraggable = true;
+                  draggable.enabled = collider.enabled = true;
 
                   draggable.OnPick.AddListener(HandleSelected);
                   draggable.OnRelease.AddListener(HandleReleased);
                   draggable.OnReturn.AddListener(HandleReturn);
 
                   embiggenTween = transform.DOScale(Vector2.one * embiggenTarget, embiggenTweenDuration).SetEase(embiggenTweenEase).SetAutoKill(false).OnKill(() => embiggenTween = null).Pause();
+                  IsAttached = false;
             }
             private void OnDisable()
             {
@@ -65,7 +65,7 @@ namespace USP.Utility
                   draggable.OnRelease.RemoveListener(HandleReleased);
                   draggable.OnReturn.RemoveListener(HandleReturn);
 
-                  draggable.enabled = collider.enabled = IsDraggable = false;
+                  draggable.enabled = collider.enabled = false;
 
                   embiggenTween?.Kill();
             }
@@ -106,7 +106,6 @@ namespace USP.Utility
             {
                   renderer.sortingOrder = originalSortingOrder;
             }
-
             private void AttachToSlot(Slot slot)
             {
                   IsAttached = true;

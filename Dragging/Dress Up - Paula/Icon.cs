@@ -58,11 +58,6 @@ namespace USP.Utility
                   punchTween?.Kill();
             }
 
-            public void OnPointerDown(PointerEventData _)
-            {
-                  if (!piece.IsDraggable) punchTween.Restart();
-            }
-
             private void Collapse()
             {
                   collapseTween.Restart();
@@ -77,6 +72,11 @@ namespace USP.Utility
             {
                   gameObject.SetActive(false);
                   OnHide.Invoke();
+            }
+
+            public void OnPointerDown(PointerEventData _)
+            {
+                  if (!piece.IsDraggable) punchTween.Restart();
             }
       }
 }
