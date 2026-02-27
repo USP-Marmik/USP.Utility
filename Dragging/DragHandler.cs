@@ -13,7 +13,7 @@ namespace USP.Utility
             [SerializeField] private InputAction press = new("Pointer Press", InputActionType.Button, "<Pointer>/press");
 
             [Header("• C O N F I G U R A T I O N")]
-            public ContactFilter2D ContactFilter;
+            public ContactFilter2D ContactFilter = new() { useTriggers = true };
             public int MaxResults = 3;
 
             private Collider2D[] hitResults;
