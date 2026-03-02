@@ -12,16 +12,20 @@ namespace USP.Utility
       {
             [Header("• C O N F I G U R A T I O N")]
             [Min(0F)] public float SmoothTime = 0.1F;
-            public float MaximumSpeed = 1000F;
+            [Min(0F)] public float MaximumSpeed = 1000F;
             public bool FreezeX, FreezeY;
-            public Vector2 PivotOffset;
+            public Vector2 Offset;
             public Collider2D Confiner;
-            public UnityEvent OnPick, OnRelease, OnReturn;
 
             [Header("• T W E E N   S E T T I N G S")]
             public bool autoReturnOnRelease;
             public float returnDuration = 0.5F;
             public Ease returnEase = Ease.OutQuad;
+
+            [Header("• E V E N T S")]
+            public UnityEvent OnPick;
+            public UnityEvent OnRelease;
+            public UnityEvent OnReturn;
 
             private new Transform transform;
             private new Collider2D collider;
@@ -29,12 +33,11 @@ namespace USP.Utility
             private Tween returnTween;
             private Coroutine releaseCoroutine;
 
-            private Vector2 dragVelocity;
+            private Vector2 velocity;
 
             public Vector2 Origin { get; set; }
-            public Vector2 Velocity => dragVelocity;
+            public Vector2 Velocity => velocity;
             public bool IsDragging { get; private set; }
-            public bool IsReturning => returnTween != null && returnTween.IsActive();
 
 
             private void Awake()
@@ -50,7 +53,7 @@ namespace USP.Utility
                   CancelReleaseCoroutine();
             }
 
-            public void Pick()
+            internal void Pick()
             {
                   CancelReleaseCoroutine();
                   CancelReturn();
@@ -58,20 +61,20 @@ namespace USP.Utility
                   IsDragging = true;
                   OnPick.Invoke();
             }
-            public void DragTo(Vector2 position)
+            internal void DragTo(Vector2 position)
             {
-                  Vector2 target = (Confiner == null ? position + PivotOffset : ClampTarget(position + PivotOffset));
-                  Vector3 p = transform.position;
+                  Vector2 target = (Confiner == null ? position + Offset : ClampTarget(position + Offset));
+                  Vector3 pos = transform.position;
 
-                  if (!FreezeX && p.x != target.x)
-                        p.x = Mathf.SmoothDamp(p.x, target.x, ref dragVelocity.x, SmoothTime, MaximumSpeed);
+                  if (!FreezeX && pos.x != target.x)
+                        pos.x = Mathf.SmoothDamp(pos.x, target.x, ref velocity.x, SmoothTime, MaximumSpeed);
 
-                  if (!FreezeY && p.y != target.y)
-                        p.y = Mathf.SmoothDamp(p.y, target.y, ref dragVelocity.y, SmoothTime, MaximumSpeed);
+                  if (!FreezeY && pos.y != target.y)
+                        pos.y = Mathf.SmoothDamp(pos.y, target.y, ref velocity.y, SmoothTime, MaximumSpeed);
 
-                  transform.position = p;
+                  transform.position = pos;
             }
-            public void Release()
+            internal void Release()
             {
                   IsDragging = false;
 
@@ -82,6 +85,7 @@ namespace USP.Utility
                   }
                   OnRelease.Invoke();
             }
+
             public void Return()
             {
                   returnTween?.Kill(false);
@@ -117,7 +121,7 @@ namespace USP.Utility
             {
                   Bounds confinerBounds = Confiner.bounds, colliderBounds = collider.bounds;
 
-                  Vector2 offset = (Vector2) (colliderBounds.center - base.transform.position);
+                  Vector2 offset = (Vector2) (colliderBounds.center - transform.position);
                   Vector2 desiredCenter = target + offset;
                   Vector2 min = confinerBounds.min + colliderBounds.extents, max = confinerBounds.max - colliderBounds.extents;
 

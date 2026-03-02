@@ -13,13 +13,13 @@ namespace USP.Utility
             [SerializeField] private InputAction press = new("Pointer Press", InputActionType.Button, "<Pointer>/press");
 
             [Header("• C O N F I G U R A T I O N")]
-            public ContactFilter2D ContactFilter = new() { useTriggers = true };
+            public ContactFilter2D Filter = new() { useTriggers = true };
             public int MaxResults = 3;
 
-            private Collider2D[] hitResults;
-            private DraggableObject current;
+            private DraggableObject currentObject;
+            private Collider2D[] results;
 
-            private Vector2 WorldPosition => camera.ScreenToWorldPoint(position.ReadValue<Vector2>());
+            private Vector2 PointerPosition => camera.ScreenToWorldPoint(position.ReadValue<Vector2>());
 
 
             private void Reset()
@@ -28,7 +28,7 @@ namespace USP.Utility
             }
             private void Awake()
             {
-                  hitResults = new Collider2D[MaxResults];
+                  results = new Collider2D[MaxResults];
             }
             private void OnEnable()
             {
@@ -40,14 +40,13 @@ namespace USP.Utility
             }
             private void LateUpdate()
             {
-                  if (current == null) return;
-
-                  if (!current.enabled)
+                  if (currentObject == null) return;
+                  if (currentObject.enabled == false)
                   {
-                        current = null;
+                        currentObject = null;
                         return;
                   }
-                  current.DragTo(WorldPosition);
+                  currentObject.DragTo(PointerPosition);
             }
             private void OnDisable()
             {
@@ -60,29 +59,22 @@ namespace USP.Utility
 
             private void HandleAction(InputAction.CallbackContext context)
             {
-                  switch (context.phase)
+                  if (context.phase is InputActionPhase.Started)
                   {
-                        case InputActionPhase.Started:
+                        int count = Physics2D.OverlapPoint(PointerPosition, Filter, results);
+                        for (int i = 0; i < count; i++)
+                        {
+                              if (results[i].TryGetComponent(out DraggableObject obj) && obj.enabled)
                               {
-                                    int count = Physics2D.OverlapPoint(WorldPosition, ContactFilter, hitResults);
-                                    for (int i = 0; i < count; i++)
-                                    {
-                                          var result = hitResults[i];
-                                          if (result.TryGetComponent(out DraggableObject obj) && obj.enabled)
-                                          {
-                                                (current = obj).Pick();
-                                                break;
-                                          }
-                                    }
+                                    (currentObject = obj).Pick();
                                     break;
                               }
-                        case InputActionPhase.Canceled when current != null:
-                              {
-                                    current.Release();
-                                    current = null;
-                                    break;
-                              }
-                        default: return;
+                        }
+                  }
+                  if (context.phase is InputActionPhase.Canceled && currentObject != null)
+                  {
+                        currentObject.Release();
+                        currentObject = null;
                   }
             }
       }
