@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,11 +9,22 @@ namespace USP.Utility
       [RequireComponent(typeof(AudioSource))]
       public class VOPlayer : MonoBehaviour
       {
+            [Serializable]
+            public sealed class Playback : CustomYieldInstruction
+            {
+                  internal bool complete;
+
+                  public bool IsComplete => complete;
+                  public override bool keepWaiting => !complete;
+            }
+
             [SerializeField] private AudioSource source;
             [SerializeField] private AudioClip[] audioClips;
 
-            private readonly Queue<AudioClip> queue = new();
+            private readonly Queue<Playback> queue = new();
+            private readonly Dictionary<Playback, AudioClip> map = new();
             private Coroutine runner;
+
 
             private IEnumerator RunQueue
             {
@@ -20,12 +32,20 @@ namespace USP.Utility
                   {
                         while (queue.Count > 0)
                         {
+                              Playback playback = queue.Dequeue();
+                              if (playback.complete)
+                              {
+                                    map.Remove(playback);
+                                    continue;
+                              }
                               yield return new WaitWhile(() => source.isPlaying);
 
-                              source.clip = queue.Dequeue();
-                              source.Play();
+                              source.PlayOneShot(map[playback]);
+                              map.Remove(playback);
+
+                              yield return new WaitWhile(() => source.isPlaying);
+                              playback.complete = true;
                         }
-                        source.clip = null;
                         runner = null;
                   }
             }
@@ -38,30 +58,27 @@ namespace USP.Utility
 
             public void Play(AudioClip clip)
             {
+                  CancelPlayback();
+                  if (clip == null) return;
+
                   source.clip = clip;
                   source.Play();
             }
-            public void Play(int index)
+            public void Play(int index) => Play(audioClips[index]);
+            public Playback Queue(AudioClip clip)
             {
-                  AudioClip clip = audioClips[index];
-                  if (clip == null) return;
-
-                  queue.Clear();
-                  Play(clip);
-            }
-            public void Queue(AudioClip clip)
-            {
-                  queue.Enqueue(clip);
-
+                  Playback playback = new();
+                  if (clip == null)
+                  {
+                        playback.complete = true;
+                        return playback;
+                  }
+                  queue.Enqueue(playback);
+                  map[playback] = clip;
                   runner ??= StartCoroutine(RunQueue);
+                  return playback;
             }
-            public void Queue(int index)
-            {
-                  AudioClip clip = audioClips[index];
-                  if (clip == null) return;
-
-                  Queue(clip);
-            }
+            public Playback Queue(int index) => Queue(audioClips[index]);
             public void Stop()
             {
                   source.Stop();
@@ -70,7 +87,13 @@ namespace USP.Utility
                         StopCoroutine(runner);
                         runner = null;
                   }
-                  queue.Clear();
+                  CancelPlayback();
+            }
+
+            private void CancelPlayback()
+            {
+                  foreach (var playback in queue) playback.complete = true;
+                  queue.Clear(); map.Clear();
             }
       }
 }

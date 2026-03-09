@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+
 using DG.Tweening;
 
 namespace USP.Utility
@@ -10,44 +11,42 @@ namespace USP.Utility
             [Header("• R E F E R E N C E S")]
             [SerializeField] private Slider slider;
 
-            public Vector2 VisiblePosition, HiddenPosition;
+            private RectTransform rect;
 
             [Header("• T W E E N   S E T T I N G S")]
-            public float showDuration = 0.5F;
-            public Ease showEase = Ease.OutBack;
+            public float visibilityDuration = 0.5F;
+            public Ease visibilityEase = Ease.InOutBack;
 
-            public float hideDuration = 0.4F;
-            public Ease hideEase = Ease.InBack;
+            private Tween visibilityTween;
 
-            private RectTransform rect;
-            private Tween showTween, hideTween;
-
-
-            public bool IsVisible { get; private set; }
-            public float Progress { get => slider.normalizedValue; set => slider.normalizedValue = Mathf.Clamp01(value); }
+            public float Progress 
+            { get => slider.normalizedValue; set => slider.normalizedValue = Mathf.Clamp01(value); }
 
 
             private void Reset()
             {
-                  slider = GetComponent<Slider>();
+                  slider = GetComponentInChildren<Slider>();
             }
             private void Awake()
             {
-                  rect = transform as RectTransform;
+                  rect = slider.transform as RectTransform;
+            }
+            private void Start()
+            {
+                  visibilityTween = rect.DOAnchorPos(Vector2.up * rect.sizeDelta.y, visibilityDuration)
+                        .SetEase(visibilityEase)
+                        .SetUpdate(true).SetAutoKill(false)
+                        .Pause();
             }
 
             public void Show(bool reset = false)
             {
-                  IsVisible = true;
                   if (reset) slider.value = 0F;
-
-                  showTween ??= rect.DOAnchorPos(VisiblePosition, showDuration).SetEase(showEase).SetUpdate(true).SetAutoKill(false).SetRecyclable(false).Pause();
-                  hideTween?.Pause(); showTween.Restart();
+                  visibilityTween.SmoothRewind();
             }
             public void Hide()
             {
-                  hideTween ??= rect.DOAnchorPos(HiddenPosition, hideDuration).SetEase(hideEase).OnComplete(() => IsVisible = false).SetUpdate(true).SetAutoKill(false).SetRecyclable(false).Pause();
-                  showTween?.Pause(); hideTween.Restart();
+                  visibilityTween.Restart();
             }
       }
 }

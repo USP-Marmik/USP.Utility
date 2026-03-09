@@ -1,6 +1,7 @@
 using DG.Tweening;
 
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace USP.Utility
 {
@@ -10,7 +11,9 @@ namespace USP.Utility
             public float visibilityDuration = 0.2F;
             public Ease visibilityEase = Ease.OutBack;
 
-            private Tween visibilityTween;
+            private Tween visibilityTween, delayedCall;
+
+            public UnityEvent OnShow, OnHide;
 
 
             private void Start()
@@ -26,13 +29,27 @@ namespace USP.Utility
             {
                   visibilityTween?.Kill();
             }
-            private void OnDisable()
-            {
-                  transform.localScale = Vector2.zero;
-            }
 
-            public void Show() => visibilityTween.PlayForward();
-            public void Show(float delay) => visibilityTween.Restart(true, delay);
-            public void Hide() => visibilityTween.SmoothRewind();
+            public void Show()
+            {
+                  delayedCall?.Kill();
+
+                  visibilityTween.PlayForward();
+                  OnShow.Invoke();
+            }
+            public void Show(float delay)
+            {
+                  visibilityTween.Restart(true, delay);
+
+                  delayedCall?.Kill();
+                  delayedCall = DOVirtual.DelayedCall(delay, OnShow.Invoke).OnKill(() => delayedCall = null);
+            }
+            public void Hide()
+            {
+                  delayedCall?.Kill();
+
+                  visibilityTween.SmoothRewind();
+                  OnHide.Invoke();
+            }
       }
 }
