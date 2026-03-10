@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,94 +5,84 @@ using UnityEngine;
 
 namespace USP.Utility
 {
-      [RequireComponent(typeof(AudioSource))]
-      public class VOPlayer : MonoBehaviour
-      {
-            [Serializable]
-            public sealed class Playback : CustomYieldInstruction
-            {
-                  internal bool complete;
+	[RequireComponent(typeof(AudioSource))]
+	public class VOPlayer : MonoBehaviour
+	{
+		public sealed class Playback : CustomYieldInstruction
+		{
+			public AudioClip Clip;
+			public bool IsComplete;
 
-                  public bool IsComplete => complete;
-                  public override bool keepWaiting => !complete;
-            }
+			public override bool keepWaiting => !IsComplete;
+		}
 
-            [SerializeField] private AudioSource source;
-            [SerializeField] private AudioClip[] audioClips;
+		[SerializeField] private AudioSource source;
+		[SerializeField] private AudioClip[] audioClips;
 
-            private readonly Queue<Playback> queue = new();
-            private readonly Dictionary<Playback, AudioClip> map = new();
-            private Coroutine runner;
+		private readonly Queue<Playback> queue = new();
+		private Coroutine runner;
 
+		private IEnumerator RunQueue
+		{
+			get
+			{
+				yield return new WaitWhile(() => source.isPlaying);
+				while (queue.Count > 0)
+				{
+					Playback playback = queue.Dequeue();
+					source.PlayOneShot(playback.Clip);
 
-            private IEnumerator RunQueue
-            {
-                  get
-                  {
-                        while (queue.Count > 0)
-                        {
-                              Playback playback = queue.Dequeue();
-                              if (playback.complete)
-                              {
-                                    map.Remove(playback);
-                                    continue;
-                              }
-                              yield return new WaitWhile(() => source.isPlaying);
+					yield return new WaitWhile(() => source.isPlaying);
+					playback.IsComplete = true;
+				}
+				runner = null;
+			}
+		}
 
-                              source.PlayOneShot(map[playback]);
-                              map.Remove(playback);
+		private void Reset()
+		{
+			source = GetComponent<AudioSource>();
+		}
 
-                              yield return new WaitWhile(() => source.isPlaying);
-                              playback.complete = true;
-                        }
-                        runner = null;
-                  }
-            }
+		public void Play(AudioClip clip)
+		{
+			CancelQueued();
+			if (clip == null) return;
 
+			source.Stop();
+			source.PlayOneShot(clip);
+		}
+		public void Play(int index) => Play(audioClips[index]);
+		public Playback Queue(AudioClip clip)
+		{
+			Playback playback = new();
+			if (clip == null)
+			{
+				playback.IsComplete = true;
+				return playback;
+			}
+			playback.Clip = clip;
+			queue.Enqueue(playback);
 
-            private void Reset()
-            {
-                  source = GetComponent<AudioSource>();
-            }
+			runner ??= StartCoroutine(RunQueue);
+			return playback;
+		}
+		public Playback Queue(int index) => Queue(audioClips[index]);
 
-            public void Play(AudioClip clip)
-            {
-                  CancelPlayback();
-                  if (clip == null) return;
-
-                  source.clip = clip;
-                  source.Play();
-            }
-            public void Play(int index) => Play(audioClips[index]);
-            public Playback Queue(AudioClip clip)
-            {
-                  Playback playback = new();
-                  if (clip == null)
-                  {
-                        playback.complete = true;
-                        return playback;
-                  }
-                  queue.Enqueue(playback);
-                  map[playback] = clip;
-                  runner ??= StartCoroutine(RunQueue);
-                  return playback;
-            }
-            public Playback Queue(int index) => Queue(audioClips[index]);
-            public void Stop()
-            {
-                  source.Stop();
-                  if (runner != null)
-                  {
-                        StopCoroutine(runner);
-                        runner = null;
-                  }
-                  CancelPlayback();
-            }
-
-            private void CancelPlayback()
-            {
-                  foreach (var playback in queue) playback.complete = true;
-                  queue.Clear(); map.Clear();
-            }
-      }
+		public void Stop()
+		{
+			source.Stop();
+			if (runner != null)
+			{
+				StopCoroutine(runner);
+				runner = null;
+			}
+			CancelQueued();
+		}
+		private void CancelQueued()
+		{
+			foreach (Playback playback in queue) playback.IsComplete = true;
+			queue.Clear();
+		}
+	}
 }
