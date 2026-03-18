@@ -94,13 +94,10 @@ namespace USP.Utility
 			returnTween?.Kill(false);
 			returnTween = transform.DOLocalMove(Origin, returnDuration)
 				.SetEase(returnEase)
-				.OnComplete(HandleReturnComplete);
+				.OnComplete(OnReturn.Invoke)
+				.OnKill(() => returnTween = null);
 		}
-		public void CancelReturn()
-		{
-			returnTween?.Kill(false);
-			returnTween = null;
-		}
+		public void CancelReturn() => returnTween?.Kill(false);
 
 		private void CancelReleaseCoroutine()
 		{
@@ -114,11 +111,6 @@ namespace USP.Utility
 			yield return new WaitForFixedUpdate();
 			releaseCoroutine = null;
 			Return();
-		}
-		private void HandleReturnComplete()
-		{
-			returnTween = null;
-			OnReturn.Invoke();
 		}
 		private Vector2 ClampTarget(Vector2 target)
 		{
