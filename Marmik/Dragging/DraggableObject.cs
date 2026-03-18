@@ -38,6 +38,7 @@ namespace USP.Utility
 		public Vector2 Origin { get; set; }
 		public Vector2 Velocity => velocity;
 		public bool IsDragging { get; private set; }
+		public bool IsReturning => returnTween != null && returnTween.IsPlaying();
 
 
 		private void Awake()
