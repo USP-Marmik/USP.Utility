@@ -333,7 +333,7 @@ namespace USP.Utility
         void OnMouseDown()
         {
             isPointerOnObject = true;
-            UtilityEventsManager.OnUserInteracted?.Invoke(this, new UtilityEventsManager.UserInteracted(gameObject));
+            //UtilityEventsManager.OnUserInteracted?.Invoke(this, new UtilityEventsManager.UserInteracted(gameObject));
         }
 
         void OnMouseUp()
