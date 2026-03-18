@@ -10,9 +10,13 @@ namespace USP.Utility
 		public float visibilityDuration = 0.2F;
 		public Ease visibilityEase = Ease.OutBack;
 
+		[Header("• E V E N T S")]
+		public UnityEvent OnShow;
+		public UnityEvent OnHide;
+
 		private Tween visibilityTween, delayedCall;
 
-		public UnityEvent OnShow, OnHide;
+		public bool IsVisible { get; private set; }
 
 
 		private void OnEnable()
@@ -21,7 +25,11 @@ namespace USP.Utility
 				.From(Vector2.zero)
 				.SetEase(visibilityEase)
 				.SetAutoKill(false)
-				.OnKill(() => visibilityTween = null)
+				.OnKill(() =>
+				{
+					IsVisible = false;
+					visibilityTween = null;
+				})
 				.Pause();
 		}
 		private void OnDisable()
@@ -33,6 +41,7 @@ namespace USP.Utility
 		{
 			delayedCall?.Kill();
 
+			IsVisible = true;
 			visibilityTween.PlayForward();
 			OnShow.Invoke();
 		}
@@ -41,12 +50,13 @@ namespace USP.Utility
 			visibilityTween.Restart(true, delay);
 
 			delayedCall?.Kill();
-			delayedCall = DOVirtual.DelayedCall(delay, OnShow.Invoke).OnKill(() => delayedCall = null);
+			delayedCall = DOVirtual.DelayedCall(delay, OnShow.Invoke).OnComplete(() => IsVisible = true).OnKill(() => delayedCall = null);
 		}
 		public void Hide()
 		{
 			delayedCall?.Kill();
 
+			IsVisible = false;
 			visibilityTween.SmoothRewind();
 			OnHide.Invoke();
 		}
