@@ -10,55 +10,57 @@ namespace USP.Utility
 	[RequireComponent(typeof(Collider2D))]
 	public sealed class DraggableObject : MonoBehaviour
 	{
-		[Header("• C O N F I G U R A T I O N")]
-		[Min(0F)] public float SmoothTime = 0.1F;
-		[Min(0F)] public float MaximumSpeed = 1000F;
-		public bool FreezeX, FreezeY;
-		public Vector2 Offset;
-		public Collider2D Confiner;
-
-		[Header("• T W E E N   S E T T I N G S")]
-		public bool autoReturnOnRelease;
-		public float returnDuration = 0.5F;
-		public Ease returnEase = Ease.OutQuad;
-
-		[Header("• E V E N T S")]
-		public UnityEvent OnPick;
-		public UnityEvent OnRelease;
-		public UnityEvent OnReturn;
-
 		private new Transform transform;
 		private new Collider2D collider;
 
 		private Tween returnTween;
 		private Coroutine releaseCoroutine;
 
-		private Vector2 velocity;
+		private Vector2 dragVelocity;
+
+		[Header("D R A G")]
+		public Collider2D Confiner;
+		public Vector2 Offset;
+		[Min(0F)] public float SmoothTime = 0.1F;
+		[Min(0F)] public float MaximumSpeed = 1000F;
+		public bool FreezeX;
+		public bool FreezeY;
+
+		[Header("T W E E N   S E T T I N G S")]
+		public bool autoReturnOnRelease;
+		public Ease returnEase = Ease.OutQuad;
+		public float returnDuration = 0.5F;
+
+		[Header("E V E N T S")]
+		public UnityEvent OnPick;
+		public UnityEvent OnRelease;
+		public UnityEvent OnReturn;
 
 		public Vector2 Origin { get; set; }
-		public Vector2 Velocity => velocity;
 		public bool IsDragging { get; private set; }
-		public bool IsReturning => returnTween != null && returnTween.IsPlaying();
+
+		public Vector2 Velocity => dragVelocity;
+		public bool IsReturning => returnTween != null && returnTween.IsActive() && returnTween.IsPlaying();
 
 
 		private void Awake()
 		{
+			transform = base.transform;
 			collider = GetComponent<Collider2D>();
 
-			transform = base.transform;
 			Origin = transform.localPosition;
 		}
 		private void OnDisable()
 		{
 			IsDragging = false;
-			velocity = Vector2.zero;
+			dragVelocity = Vector2.zero;
 
-			CancelReleaseCoroutine();
+			StopReleaseCoroutine();
 		}
 
 		internal void Pick()
 		{
-			CancelReleaseCoroutine();
+			StopReleaseCoroutine();
 			CancelReturn();
 
 			IsDragging = true;
@@ -66,25 +68,25 @@ namespace USP.Utility
 		}
 		internal void DragTo(Vector2 position)
 		{
-			Vector2 target = (Confiner == null ? position + Offset : ClampTarget(position + Offset));
-			Vector3 pos = transform.position;
+			Vector2 target = position + Offset;
+			Vector3 p = transform.position;
 
-			if (!FreezeX && pos.x != target.x)
-				pos.x = Mathf.SmoothDamp(pos.x, target.x, ref velocity.x, SmoothTime, MaximumSpeed);
+			if (Confiner != null) target = ClampTarget(target);
 
-			if (!FreezeY && pos.y != target.y)
-				pos.y = Mathf.SmoothDamp(pos.y, target.y, ref velocity.y, SmoothTime, MaximumSpeed);
+			if (!FreezeX && p.x != target.x)
+				p.x = Mathf.SmoothDamp(p.x, target.x, ref dragVelocity.x, SmoothTime, MaximumSpeed);
+			if (!FreezeY && p.y != target.y)
+				p.y = Mathf.SmoothDamp(p.y, target.y, ref dragVelocity.y, SmoothTime, MaximumSpeed);
 
-			transform.position = pos;
+			transform.position = p;
 		}
 		internal void Release()
 		{
 			IsDragging = false;
-			velocity = Vector2.zero;
-
+			dragVelocity = Vector2.zero;
 			if (autoReturnOnRelease)
 			{
-				CancelReleaseCoroutine();
+				StopReleaseCoroutine();
 				releaseCoroutine = StartCoroutine(ReturnOnNextPhysicsUpdate());
 			}
 			OnRelease.Invoke();
@@ -100,7 +102,7 @@ namespace USP.Utility
 		}
 		public void CancelReturn() => returnTween?.Kill(false);
 
-		private void CancelReleaseCoroutine()
+		private void StopReleaseCoroutine()
 		{
 			if (releaseCoroutine == null) return;
 
@@ -115,16 +117,18 @@ namespace USP.Utility
 		}
 		private Vector2 ClampTarget(Vector2 target)
 		{
-			Bounds confinerBounds = Confiner.bounds, colliderBounds = collider.bounds;
+			if (Confiner == null) return target;
 
-			Vector2 offset = (Vector2) (colliderBounds.center - transform.position);
-			Vector2 desiredCenter = target + offset;
-			Vector2 min = confinerBounds.min + colliderBounds.extents, max = confinerBounds.max - colliderBounds.extents;
+			Bounds confinerBounds = Confiner.bounds, draggableBounds = collider.bounds;
+
+			Vector2 min = confinerBounds.min + draggableBounds.extents, max = confinerBounds.max - draggableBounds.extents;
 
 			if (min.x > max.x) min.x = max.x = confinerBounds.center.x;
 			if (min.y > max.y) min.y = max.y = confinerBounds.center.y;
 
-			Vector2 output = new(Mathf.Clamp(desiredCenter.x, min.x, max.x), Mathf.Clamp(desiredCenter.y, min.y, max.y));
+			Vector2 offset = draggableBounds.center - transform.position;
+			Vector2 center = target + offset;
+			Vector2 output = new(Mathf.Clamp(center.x, min.x, max.x), Mathf.Clamp(center.y, min.y, max.y));
 
 			return output - offset;
 		}

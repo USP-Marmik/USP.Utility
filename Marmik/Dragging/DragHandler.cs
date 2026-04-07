@@ -5,19 +5,20 @@ namespace USP.Utility
 {
 	public sealed class DragHandler : MonoBehaviour
 	{
-		[Header("• R E F E R E N C E S")]
+		[Header("R E F E R E N C E S")]
 		[SerializeField] private new Camera camera;
 
-		[Header("• I N P U T ")]
+		[Header("I N P U T ")]
 		[SerializeField] private InputAction position = new("Pointer Position", InputActionType.Value, "<Pointer>/position");
 		[SerializeField] private InputAction press = new("Pointer Press", InputActionType.Button, "<Pointer>/press");
 
-		[Header("• C O N F I G U R A T I O N")]
+		private DraggableObject currentObject;
+		private Collider2D[] results;
+
+		[Header("C O N F I G U R A T I O N")]
 		public ContactFilter2D Filter = new() { useTriggers = true };
 		public int MaxResults = 3;
 
-		private DraggableObject currentObject;
-		private Collider2D[] results;
 
 		private Vector2 PointerWorldPosition
 		{
@@ -44,7 +45,7 @@ namespace USP.Utility
 			press.started += OnStarted;
 			press.canceled += OnCanceled;
 		}
-		private void Update()
+		private void LateUpdate()
 		{
 			if (currentObject == null) return;
 			if (!currentObject.isActiveAndEnabled) { currentObject = null; return; }
