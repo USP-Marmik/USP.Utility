@@ -37,11 +37,16 @@ namespace USP.Utility
 
 		public void Apply(FitMode mode)
 		{
-			float aspect = (float) Screen.width / Screen.height;
+			if (Background == null)
+			{
+				Debug.LogError("CameraAutoFit: Background is not assigned.", this);
+				return;
+			}
 
 			Bounds bounds = Background.bounds;
 			bounds.Expand(new Vector3(Padding.x * 2F, Padding.y * 2F));
 
+			float aspect = (float) Screen.width / Screen.height;
 			float target = Mathf.Min(mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize }, MaxOrthographicSize);
 
 			Camera.orthographicSize = target;

@@ -5,17 +5,17 @@ namespace USP.Utility
 {
 	public sealed class DragHandler : MonoBehaviour
 	{
-		[Header("R E F E R E N C E S")]
+		[Header("- R E F E R E N C E S")]
 		[SerializeField] private new Camera camera;
 
-		[Header("I N P U T ")]
+		[Header("- I N P U T ")]
 		[SerializeField] private InputAction position = new("Pointer Position", InputActionType.Value, "<Pointer>/position");
 		[SerializeField] private InputAction press = new("Pointer Press", InputActionType.Button, "<Pointer>/press");
 
 		private DraggableObject currentObject;
 		private Collider2D[] results;
 
-		[Header("C O N F I G U R A T I O N")]
+		[Header("- C O N F I G U R A T I O N")]
 		public ContactFilter2D Filter = new() { useTriggers = true };
 		public int MaxResults = 3;
 
@@ -61,7 +61,7 @@ namespace USP.Utility
 			press.Disable();
 		}
 
-		private void OnStarted(InputAction.CallbackContext context)
+		private void OnStarted(InputAction.CallbackContext _)
 		{
 			int count = Physics2D.OverlapPoint(PointerWorldPosition, Filter, results);
 			for (int i = 0; i < count; i++)
@@ -75,7 +75,9 @@ namespace USP.Utility
 		}
 		private void OnCanceled(InputAction.CallbackContext _)
 		{
-			currentObject?.Release();
+			if (currentObject == null) return;
+
+			currentObject.Release();
 			currentObject = null;
 		}
 	}

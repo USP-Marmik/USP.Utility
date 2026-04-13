@@ -13,12 +13,12 @@ namespace USP.Utility
 		private new Transform transform;
 		private new Collider2D collider;
 
-		private Tween returnTween;
+		private Tweener returnTween;
 		private Coroutine releaseCoroutine;
 
-		private Vector2 dragVelocity;
+		private Vector2 origin, dragVelocity;
 
-		[Header("D R A G")]
+		[Header("- D R A G")]
 		public Collider2D Confiner;
 		public Vector2 Offset;
 		[Min(0F)] public float SmoothTime = 0.1F;
@@ -26,21 +26,29 @@ namespace USP.Utility
 		public bool FreezeX;
 		public bool FreezeY;
 
-		[Header("T W E E N   S E T T I N G S")]
+		[Header("- T W E E N   S E T T I N G S")]
 		public bool autoReturnOnRelease;
 		public Ease returnEase = Ease.OutQuad;
 		public float returnDuration = 0.5F;
 
-		[Header("E V E N T S")]
+		[Header("- E V E N T S")]
 		public UnityEvent OnPick;
 		public UnityEvent OnRelease;
 		public UnityEvent OnReturn;
 
-		public Vector2 Origin { get; set; }
+		public Vector2 Origin
+		{
+			get => origin;
+			set
+			{
+				origin = value;
+				returnTween?.ChangeEndValue(value, false);
+			}
+		}
 		public bool IsDragging { get; private set; }
 
 		public Vector2 Velocity => dragVelocity;
-		public bool IsReturning => returnTween != null && returnTween.IsActive() && returnTween.IsPlaying();
+		public bool IsReturning => returnTween.IsActive() && returnTween.IsPlaying();
 
 
 		private void Awake()
@@ -52,16 +60,17 @@ namespace USP.Utility
 		}
 		private void OnDisable()
 		{
-			IsDragging = false;
 			dragVelocity = Vector2.zero;
+			IsDragging = false;
 
 			StopReleaseCoroutine();
+			returnTween.Kill(false);
 		}
 
 		internal void Pick()
 		{
 			StopReleaseCoroutine();
-			CancelReturn();
+			PauseAutoReturn();
 
 			IsDragging = true;
 			OnPick.Invoke();
@@ -82,8 +91,9 @@ namespace USP.Utility
 		}
 		internal void Release()
 		{
-			IsDragging = false;
 			dragVelocity = Vector2.zero;
+			IsDragging = false;
+
 			if (autoReturnOnRelease)
 			{
 				StopReleaseCoroutine();
@@ -94,13 +104,12 @@ namespace USP.Utility
 
 		public void Return()
 		{
-			returnTween?.Kill(false);
-			returnTween = transform.DOLocalMove(Origin, returnDuration)
-				.SetEase(returnEase)
-				.OnComplete(OnReturn.Invoke)
-				.OnKill(() => returnTween = null);
+			if (returnTween == null)
+				returnTween = transform.DOLocalMove(Origin, returnDuration).SetEase(returnEase).OnComplete(OnReturn.Invoke).OnKill(() => returnTween = null).SetAutoKill(false);
+			else
+				returnTween.ChangeStartValue(transform.localPosition).Restart();
 		}
-		public void CancelReturn() => returnTween?.Kill(false);
+		public void PauseAutoReturn() => returnTween?.Pause();
 
 		private void StopReleaseCoroutine()
 		{
@@ -112,8 +121,9 @@ namespace USP.Utility
 		private IEnumerator ReturnOnNextPhysicsUpdate()
 		{
 			yield return new WaitForFixedUpdate();
-			releaseCoroutine = null;
+
 			Return();
+			releaseCoroutine = null;
 		}
 		private Vector2 ClampTarget(Vector2 target)
 		{
