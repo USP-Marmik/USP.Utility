@@ -56,7 +56,7 @@ namespace USP.Utility
 			transform = base.transform;
 			collider = GetComponent<Collider2D>();
 
-			Origin = transform.localPosition;
+			origin = transform.localPosition;
 		}
 		private void OnDisable()
 		{
@@ -105,7 +105,7 @@ namespace USP.Utility
 		public void Return()
 		{
 			if (returnTween == null)
-				returnTween = transform.DOLocalMove(Origin, returnDuration).SetEase(returnEase).OnComplete(OnReturn.Invoke).OnKill(() => returnTween = null).SetAutoKill(false);
+				returnTween = transform.DOLocalMove(origin, returnDuration).SetEase(returnEase).OnComplete(OnReturn.Invoke).OnKill(() => returnTween = null).SetAutoKill(false);
 			else
 				returnTween.ChangeStartValue(transform.localPosition).Restart();
 		}
