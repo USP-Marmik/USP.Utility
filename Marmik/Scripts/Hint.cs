@@ -4,61 +4,66 @@ using DG.Tweening;
 
 namespace USP.Utility
 {
-	public class Hint : MonoBehaviour
-	{
-		[Header("• T W E E N   S E T T I N G S")]
-		public float visibilityDuration = 0.2F;
-		public Ease visibilityEase = Ease.OutBack;
+      public class Hint : MonoBehaviour
+      {
+            [Header("â€¢ T W E E N   S E T T I N G S")]
+            public float visibilityDuration = 0.2F;
+            public Ease visibilityEase = Ease.OutBack;
 
-		[Header("• E V E N T S")]
-		public UnityEvent OnShow;
-		public UnityEvent OnHide;
+            [Header("â€¢ E V E N T S")]
+            public UnityEvent OnShow;
+            public UnityEvent OnHide;
 
-		private Tween visibilityTween, delayedCall;
+            private Tween visibilityTween, delayedCall;
 
-		public bool IsVisible { get; private set; }
+            public Transform Transform { get; private set; }
+            public bool IsVisible { get; private set; }
 
 
-		private void OnEnable()
-		{
-			visibilityTween = transform.DOScale(Vector2.one, visibilityDuration)
-				.From(Vector2.zero)
-				.SetEase(visibilityEase)
-				.SetAutoKill(false)
-				.OnKill(() =>
-				{
-					IsVisible = false;
-					visibilityTween = null;
-				})
-				.Pause();
-		}
-		private void OnDisable()
-		{
-			visibilityTween?.Kill();
-		}
+            private void Awake()
+            {
+                  Transform = transform;
+            }
+            private void OnEnable()
+            {
+                  visibilityTween = transform.DOScale(Vector2.one, visibilityDuration)
+                        .From(Vector2.zero)
+                        .SetEase(visibilityEase)
+                        .SetAutoKill(false)
+                        .OnKill(() =>
+                        {
+                              IsVisible = false;
+                              visibilityTween = null;
+                        })
+                        .Pause();
+            }
+            private void OnDisable()
+            {
+                  visibilityTween?.Kill();
+            }
 
-		public void Show()
-		{
-			delayedCall?.Kill();
+            public void Show()
+            {
+                  delayedCall?.Kill(false);
 
-			IsVisible = true;
-			visibilityTween.PlayForward();
-			OnShow.Invoke();
-		}
-		public void Show(float delay)
-		{
-			visibilityTween.Restart(true, delay);
+                  IsVisible = true;
+                  visibilityTween.PlayForward();
+                  OnShow.Invoke();
+            }
+            public void Show(float delay)
+            {
+                  visibilityTween.Restart(true, delay);
 
-			delayedCall?.Kill();
-			delayedCall = DOVirtual.DelayedCall(delay, OnShow.Invoke).OnComplete(() => IsVisible = true).OnKill(() => delayedCall = null);
-		}
-		public void Hide()
-		{
-			delayedCall?.Kill();
+                  delayedCall?.Kill(false);
+                  delayedCall = DOVirtual.DelayedCall(delay, OnShow.Invoke).OnComplete(() => IsVisible = true).OnKill(() => delayedCall = null);
+            }
+            public void Hide()
+            {
+                  delayedCall?.Kill(false);
 
-			IsVisible = false;
-			visibilityTween.SmoothRewind();
-			OnHide.Invoke();
-		}
-	}
+                  IsVisible = false;
+                  visibilityTween.PlayBackwards();
+                  OnHide.Invoke();
+            }
+      }
 }
