@@ -36,7 +36,7 @@ namespace USP.Utility
 		public UnityEvent OnRelease;
 		public UnityEvent OnReturn;
 
-		public Vector2 Origin
+		public Vector3 Origin
 		{
 			get => origin;
 			set
