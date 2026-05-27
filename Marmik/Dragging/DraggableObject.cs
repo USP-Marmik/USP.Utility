@@ -42,7 +42,7 @@ namespace USP.Utility
 			set
 			{
 				origin = value;
-				returnTween?.ChangeEndValue(value, false);
+				returnTween?.ChangeEndValue(value, true);
 			}
 		}
 		public bool IsDragging { get; private set; }
