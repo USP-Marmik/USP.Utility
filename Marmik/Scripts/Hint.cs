@@ -16,14 +16,9 @@ namespace USP.Utility
 
             private Tween visibilityTween, delayedCall;
 
-            public Transform Transform { get; private set; }
             public bool IsVisible { get; private set; }
 
 
-            private void Awake()
-            {
-                  Transform = transform;
-            }
             private void OnEnable()
             {
                   visibilityTween = transform.DOScale(Vector2.one, visibilityDuration)
