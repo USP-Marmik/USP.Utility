@@ -39,7 +39,9 @@ namespace USP.Utility
                         .SetAutoKill(false)
                         .OnKill(() =>
                         {
-                              IsVisible = false;
+					transform.localScale = Vector3.zero;
+					IsVisible = false;
+
                               visibilityTween = null;
                         })
                         .Pause();
