@@ -45,13 +45,6 @@ namespace USP.Utility
 			press.started += OnStarted;
 			press.canceled += OnCanceled;
 		}
-		private void LateUpdate()
-		{
-			if (currentObject == null) return;
-			if (!currentObject.isActiveAndEnabled) { currentObject = null; return; }
-
-			currentObject.DragTo(PointerWorldPosition);
-		}
 		private void OnDisable()
 		{
 			press.started -= OnStarted;
@@ -59,6 +52,16 @@ namespace USP.Utility
 
 			position.Disable();
 			press.Disable();
+		}
+		private void LateUpdate()
+		{
+			if (currentObject == null) return;
+			if (!currentObject.isActiveAndEnabled)
+			{
+				currentObject = null;
+				return;
+			}
+			currentObject.DragTo(PointerWorldPosition);
 		}
 
 		private void OnStarted(InputAction.CallbackContext _)
