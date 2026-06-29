@@ -16,44 +16,50 @@ namespace USP.Utility
 			public override bool keepWaiting => !IsComplete;
 		}
 
-		[SerializeField] private AudioSource source;
-		[SerializeField] private AudioClip[] audioClips;
+		[SerializeField] private AudioSource audioSource;
+		[SerializeField] private AudioClip[] audioClips_female, audioClips_male;
 
-		private readonly Queue<Playback> queue = new();
+		private readonly Queue<Playback> playbackQueue = new();
 		private Coroutine runner;
 
-		private IEnumerator RunQueue
-		{
-			get
-			{
-				yield return new WaitWhile(() => source.isPlaying);
-				while (queue.Count > 0)
-				{
-					Playback playback = queue.Dequeue();
-					source.PlayOneShot(playback.Clip);
+		[field: SerializeField] public bool IsFemale { get; set; } = true;
+		public AudioClip[] ActiveClips => IsFemale ? audioClips_female : audioClips_male;
 
-					yield return new WaitWhile(() => source.isPlaying);
-					playback.IsComplete = true;
-				}
-				runner = null;
-			}
-		}
 
 		private void Reset()
 		{
-			source = GetComponent<AudioSource>();
+			audioSource = GetComponent<AudioSource>();
+			audioSource.playOnAwake = false;
 		}
 
 		public void Play(AudioClip clip)
 		{
-			CancelQueued();
+			CancelQueue();
 			if (clip == null) return;
 
-			source.Stop();
-			source.PlayOneShot(clip);
+			audioSource.Stop();
+			audioSource.clip = clip;
+			audioSource.Play();
 		}
-		public void Play(int index) => Play(audioClips[index]);
-		public Playback Queue(AudioClip clip)
+		public void Play(int index)
+		{
+			if (IsValidIndex(index)) Play(ActiveClips[index]);
+		}
+
+		private IEnumerator RunQueueRoutine()
+		{
+			while (audioSource.isPlaying) yield return null;
+			while (playbackQueue.Count > 0)
+			{
+				Playback playback = playbackQueue.Dequeue();
+				audioSource.PlayOneShot(playback.Clip);
+				while (audioSource.isPlaying) yield return null;
+				playback.IsComplete = true;
+			}
+			runner = null;
+		}
+
+		public Playback Enqueue(AudioClip clip)
 		{
 			Playback playback = new();
 			if (clip == null)
@@ -62,27 +68,39 @@ namespace USP.Utility
 				return playback;
 			}
 			playback.Clip = clip;
-			queue.Enqueue(playback);
+			playbackQueue.Enqueue(playback);
 
-			runner ??= StartCoroutine(RunQueue);
+			runner ??= StartCoroutine(RunQueueRoutine());
 			return playback;
 		}
-		public Playback Queue(int index) => Queue(audioClips[index]);
+		public Playback Enqueue(int index) => IsValidIndex(index) ? Enqueue(ActiveClips[index]) : Enqueue(null);
 
 		public void Stop()
 		{
-			source.Stop();
+			audioSource.Stop();
 			if (runner != null)
 			{
 				StopCoroutine(runner);
 				runner = null;
 			}
-			CancelQueued();
+			CancelQueue();
 		}
-		private void CancelQueued()
+		private bool IsValidIndex(int index)
 		{
-			foreach (Playback playback in queue) playback.IsComplete = true;
-			queue.Clear();
+			if (index < 0 || index >= (ActiveClips.Length))
+			{
+				Debug.LogWarning($"[{typeof(VOPlayer).Name}] Invalid audio clip index: {index}");
+				return false;
+			}
+			return true;
+		}
+		private void CancelQueue()
+		{
+			foreach (Playback playback in playbackQueue)
+			{
+				playback.IsComplete = true;
+			}
+			playbackQueue.Clear();
 		}
 	}
 }

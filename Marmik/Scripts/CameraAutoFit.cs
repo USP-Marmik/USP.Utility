@@ -9,7 +9,7 @@ namespace USP.Utility
 
 		public Camera Camera;
 		public SpriteRenderer Background;
-		public Vector2 WorldPadding;
+		public Vector2 BackgroundPadding;
 
 		public FitMode Mode;
 		public float MaxOrthographicSize = 5.4F;
@@ -39,12 +39,12 @@ namespace USP.Utility
 		{
 			if (Background == null)
 			{
-				Debug.LogError("CameraAutoFit: Background is not assigned.", this);
+				Debug.LogError(typeof(CameraAutoFit).Name + ": Background is not assigned.", this);
 				return;
 			}
 
 			Bounds bounds = Background.bounds;
-			bounds.Expand(new Vector3(WorldPadding.x * 2F, WorldPadding.y * 2F));
+			bounds.Expand(new Vector3(BackgroundPadding.x * 2F, BackgroundPadding.y * 2F));
 
 			float aspect = (float) Screen.width / Screen.height;
 			float target = Mathf.Min(mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize }, MaxOrthographicSize);
