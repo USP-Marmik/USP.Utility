@@ -1,0 +1,10 @@
+DOCUMENT BY VISHAL LAKHANI ( usp.vishal@gmail.com)
+
+--------------------------------------------------------
+
+Import this to you root of your project 
+-_DONOTIMPORTTOANOTHERGAME must not be renamed because this will help you to reference the game files which should never be imported to the main A&B game prod project.
+-Audio library helps to keep all audio (VOICE OVER files) for male and female at same place, later can be called from your script. 
+-after placing all VOs right click on script and check duplicates. additionally remove all duplicates(if any) 
+-on tools section click Generate Audio ENUM. this will make a new file inside  Asset/Generated/AudioEnum.cs this audio Enum will be used across the game. 
+
