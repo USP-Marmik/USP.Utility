@@ -3,7 +3,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace USP.MiniGame.recognitionPatterns
+namespace USP.MiniGame.audioEnumGenerator
 {
     /// <summary>
     /// Script by Vishal Lakhani

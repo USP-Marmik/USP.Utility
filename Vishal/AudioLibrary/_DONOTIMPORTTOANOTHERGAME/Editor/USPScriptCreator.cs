@@ -1,7 +1,10 @@
+//SCRIPT BY VISHAL LAKHANI
 using System.IO;
 using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
+
+//SCRIPT BY VISHAL LAKHANI
 
 public static class USPScriptCreator
 {
@@ -132,3 +135,11 @@ public static class USPScriptCreator
         }
     }
 }
+
+
+
+
+
+
+
+//SCRIPT BY VISHAL LAKHANI
