@@ -6,7 +6,7 @@ using UnityEngine;
 namespace USP.Utility
 {
 	[RequireComponent(typeof(AudioSource))]
-	public class VOPlayer : MonoBehaviour
+	public class DialoguePlayer : MonoBehaviour
 	{
 		public sealed class Playback : CustomYieldInstruction
 		{
@@ -89,7 +89,7 @@ namespace USP.Utility
 		{
 			if (index < 0 || index >= (ActiveClips.Length))
 			{
-				Debug.LogWarning($"[{typeof(VOPlayer).Name}] Invalid audio clip index: {index}");
+				Debug.LogWarning($"[{typeof(DialoguePlayer).Name}] Invalid audio clip index: {index}");
 				return false;
 			}
 			return true;

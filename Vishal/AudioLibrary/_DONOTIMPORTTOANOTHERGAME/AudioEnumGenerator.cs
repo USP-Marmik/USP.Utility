@@ -1,61 +1,61 @@
-using System.IO;
-using System.Text;
-using UnityEditor;
-using UnityEngine;
+//using System.IO;
+//using System.Text;
+//using UnityEditor;
+//using UnityEngine;
 
-namespace USP.MiniGame.audioEnumGenerator
-{
-    /// <summary>
-    /// Script by Vishal Lakhani
-    /// Email: usp.vishal@gmail.com
-    /// Description:
-    /// </summary>
-    public class AudioEnumGenerator
-    {
-#if UNITY_EDITOR
-        private const string path = "Assets/Generated/AudioEnum.cs";
+//namespace USP.MiniGame.audioEnumGenerator
+//{
+//    /// <summary>
+//    /// Script by Vishal Lakhani
+//    /// Email: usp.vishal@gmail.com
+//    /// Description:
+//    /// </summary>
+//    public class AudioEnumGenerator
+//    {
+//#if UNITY_EDITOR
+//        private const string path = "Assets/Generated/AudioEnum.cs";
 
-        [MenuItem("Tools/Generate Audio Enum")]
-        public static void GenerateEnum()
-        {
-            AudioLibrary lib = GameObject.FindObjectOfType<AudioLibrary>();
+//        [MenuItem("Tools/Generate Audio Enum")]
+//        public static void GenerateEnum()
+//        {
+//            AudioLibrary lib = GameObject.FindObjectOfType<AudioLibrary>();
 
-            if (lib == null)
-            {
-                Debug.LogError("AudioLibrary not found in scene!");
-                return;
-            }
+//            if (lib == null)
+//            {
+//                Debug.LogError("AudioLibrary not found in scene!");
+//                return;
+//            }
 
-            StringBuilder sb = new StringBuilder();
+//            StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine("public enum AudioID");
-            sb.AppendLine("{none,");
+//            sb.AppendLine("public enum AudioID");
+//            sb.AppendLine("{none,");
 
-            foreach (var audio in lib.audioLib)
-            {
-                if (string.IsNullOrEmpty(audio.name)) continue;
+//            foreach (var audio in lib.audioLib)
+//            {
+//                if (string.IsNullOrEmpty(audio.name)) continue;
 
-                string safeName = audio.name.Replace(" ", "_");
-                if (char.IsDigit(safeName[0]))
-                {
-                    safeName = "_" + safeName;
-                }
-                sb.AppendLine($"    {safeName},");
-            }
+//                string safeName = audio.name.Replace(" ", "_");
+//                if (char.IsDigit(safeName[0]))
+//                {
+//                    safeName = "_" + safeName;
+//                }
+//                sb.AppendLine($"    {safeName},");
+//            }
 
-            sb.AppendLine("}");
+//            sb.AppendLine("}");
 
-            // Ensure folder exists
-            Directory.CreateDirectory("Assets/Generated");
+//            // Ensure folder exists
+//            Directory.CreateDirectory("Assets/Generated");
 
-            File.WriteAllText(path, sb.ToString());
+//            File.WriteAllText(path, sb.ToString());
 
-            AssetDatabase.Refresh();
+//            AssetDatabase.Refresh();
 
-            Debug.Log("Audio Enum Generated!");
+//            Debug.Log("Audio Enum Generated!");
 
-        }
-#endif
-    }
+//        }
+//#endif
+//    }
 
-}
+//}
