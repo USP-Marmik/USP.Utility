@@ -45,6 +45,11 @@ namespace USP.Utility
 		{
 			if (IsValidIndex(index)) Play(ActiveClips[index]);
 		}
+		public void PlayRandom(params int[] indices)
+		{
+			int index = indices[Random.Range(0, indices.Length)];
+			Play(index);
+		}
 
 		private IEnumerator RunQueueRoutine()
 		{
