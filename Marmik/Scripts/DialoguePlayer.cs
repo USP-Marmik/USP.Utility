@@ -45,7 +45,7 @@ namespace USP.Utility
 		{
 			if (IsValidIndex(index)) Play(ActiveClips[index]);
 		}
-		public void PlayRandom(params int[] indices)
+		public void Play(params int[] indices)
 		{
 			int index = indices[Random.Range(0, indices.Length)];
 			Play(index);
@@ -78,7 +78,12 @@ namespace USP.Utility
 			runner ??= StartCoroutine(RunQueueRoutine());
 			return playback;
 		}
-		public Playback Enqueue(int index) => IsValidIndex(index) ? Enqueue(ActiveClips[index]) : Enqueue(null);
+		public Playback Enqueue(int index) => IsValidIndex(index) ? Enqueue(ActiveClips[index]) : Enqueue(null as AudioClip);
+		public Playback Enqueue(params int[] indices)
+		{
+			int index = indices[Random.Range(0, indices.Length)];
+			return Enqueue(index);
+		}
 
 		public void Stop()
 		{
