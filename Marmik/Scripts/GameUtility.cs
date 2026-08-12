@@ -4,7 +4,7 @@ namespace USP.Utility
 {
 	public static class GameUtility
 	{
-		public static bool IsPhoneLikeAspectRatio
+		public static bool IsWideAspectRatio
 		{
 			get
 			{
