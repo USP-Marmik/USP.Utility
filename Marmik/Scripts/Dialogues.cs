@@ -87,7 +87,7 @@ namespace USP.Utility
 
 		public void Stop()
 		{
-			if (audioSource) audioSource.Stop();
+			audioSource.Stop();
 			if (runner != null)
 			{
 				StopCoroutine(runner);
