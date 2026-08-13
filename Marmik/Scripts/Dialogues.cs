@@ -6,7 +6,7 @@ using UnityEngine;
 namespace USP.Utility
 {
 	[RequireComponent(typeof(AudioSource))]
-	public class Dialogues : MonoBehaviour
+	public class Dialogues : Lightweight<Dialogues>
 	{
 		public sealed class Playback : CustomYieldInstruction
 		{

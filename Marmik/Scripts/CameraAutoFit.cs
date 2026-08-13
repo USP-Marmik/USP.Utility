@@ -8,11 +8,14 @@ namespace USP.Utility
 		public enum FitMode { Horizontal, Vertical }
 
 		public Camera Camera;
-		public SpriteRenderer Background;
-		public Vector2 BackgroundPadding;
 
-		public FitMode Mode;
+		[Space(2F)]
 		public float MaxOrthographicSize = 5.4F;
+
+		[Header("C O N F I G U R A T I O N")]
+		[SerializeField] private SpriteRenderer background;
+		[SerializeField] private Vector2 backgroundPadding;
+		[SerializeField] private FitMode mode;
 
 		[SerializeField] private bool autoApplyOnStart = true;
 
@@ -23,22 +26,25 @@ namespace USP.Utility
 		}
 		public void Start()
 		{
-			if (autoApplyOnStart) Apply(Mode);
+			if (autoApplyOnStart) Apply();
 		}
 
-		public void Apply(FitMode mode)
+		public void Apply() => Apply(mode, background, backgroundPadding);
+		public void Apply(FitMode mode) => Apply(mode, background, backgroundPadding);
+		public void Apply(FitMode mode, SpriteRenderer background, Vector2 padding = default)
 		{
-			if (Background == null)
+			if (background == null)
 			{
-				Debug.LogError(typeof(CameraAutoFit).Name + ": Background is not assigned.", this);
-				return;
+				throw new System.ArgumentNullException(nameof(background));
 			}
 
-			Bounds bounds = Background.bounds;
-			bounds.Expand(new Vector3(BackgroundPadding.x * 2F, BackgroundPadding.y * 2F));
+			Bounds bounds = background.bounds;
+			bounds.Expand(new Vector3(padding.x * 2F, padding.y * 2F));
 
 			float aspect = (float) Screen.width / Screen.height;
-			float target = Mathf.Min(mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize }, MaxOrthographicSize);
+
+			float orthographicSize = mode switch { FitMode.Horizontal => bounds.extents.x / aspect, FitMode.Vertical => bounds.extents.y, _ => Camera.orthographicSize };
+			float target = Mathf.Min(orthographicSize, MaxOrthographicSize);
 
 			Camera.orthographicSize = target;
 
