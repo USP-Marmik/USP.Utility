@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 namespace USP.Utility
@@ -87,7 +86,7 @@ namespace USP.Utility
 
 		public void Stop()
 		{
-			audioSource.Stop();
+			audioSource?.Stop();
 			if (runner != null)
 			{
 				StopCoroutine(runner);
