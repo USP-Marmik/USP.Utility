@@ -2,7 +2,6 @@ using System.Collections;
 
 using UnityEngine;
 using UnityEngine.Events;
-
 using DG.Tweening;
 
 namespace USP.Utility
@@ -13,6 +12,7 @@ namespace USP.Utility
 		private new Transform transform;
 		private new Collider2D collider;
 
+		private Tween punchTween;
 		private Tweener returnTween;
 		private Coroutine releaseCoroutine;
 
@@ -30,6 +30,9 @@ namespace USP.Utility
 		public bool autoReturnOnRelease;
 		public Ease returnEase = Ease.OutQuad;
 		public float returnDuration = 0.5F;
+		public bool punchOnPick;
+		[Range(-1F, 1F)] public float punchOffset;
+		public float punchDuration = 0.5F, punchElasticity = 1F;
 
 		[Header("- E V E N T S")]
 		public UnityEvent OnPick;
@@ -65,6 +68,10 @@ namespace USP.Utility
 
 			StopReleaseCoroutine();
 			returnTween.Kill(false);
+
+			if (punchTween.IsPlaying()) punchTween.Rewind();
+			punchTween.Kill();
+			punchTween = null;
 		}
 
 		internal void Pick()
@@ -74,6 +81,10 @@ namespace USP.Utility
 
 			IsDragging = true;
 			OnPick.Invoke();
+
+			if (!punchOnPick) return;
+			punchTween ??= transform.DOPunchScale(Vector3.one * punchOffset, punchDuration, 1, punchElasticity).SetAutoKill(false);
+			punchTween.Restart();
 		}
 		internal void DragTo(Vector2 position)
 		{
