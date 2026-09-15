@@ -1,22 +1,24 @@
 using UnityEngine;
+using USP.Data;
 
 namespace USP.Utility
 {
-	[DefaultExecutionOrder(1)]
 	public class GameManager : MonoBehaviour
 	{
-		public ScreenOrientation Orientation = ScreenOrientation.LandscapeLeft;
 		public bool IsMultiTouch;
-
 		public bool UnlockFrameRate;
+
+		[SerializeField] private AudioSource music, voice;
 
 
 		private void Awake()
 		{
-			Screen.orientation = Orientation;
 			Input.multiTouchEnabled = IsMultiTouch;
 
 			if (UnlockFrameRate) Application.targetFrameRate = 400;
+
+			if (music != null) music.mute = !OfflineChildData.Instance.GetSettingToggleStates(SettingToggle.Music);
+			if (voice != null) voice.mute = !OfflineChildData.Instance.GetSettingToggleStates(SettingToggle.Sound);
 		}
 	}
 }
