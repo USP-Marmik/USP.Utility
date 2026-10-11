@@ -47,6 +47,7 @@ namespace USP.Utility
                         visibilityTween
                               .SetEase(visibilityEase)
                               .SetAutoKill(false)
+                              .SetUpdate(true)
                               .OnKill(() =>
                               {
                                       visibilityTween = null;
