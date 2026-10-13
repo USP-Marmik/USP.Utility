@@ -25,6 +25,11 @@ namespace USP.Utility
 			source.playOnAwake = false;
 		}
 
+		public static void PlayExclusive(int index)
+		{
+			if (Instance.source.isPlaying) return;
+			Play(index);
+		}
 		public static void Play(int index)
 		{
 			Sound sound = Instance.sounds[index];

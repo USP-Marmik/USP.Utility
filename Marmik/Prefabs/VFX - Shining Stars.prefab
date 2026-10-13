@@ -222,8 +222,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.21176472, g: 0.6745098, b: 0.9450981, a: 1}
-      maxColor: {r: 0.94117653, g: 0.96470594, b: 0.98823535, a: 1}
+      minColor: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
+      maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 0, b: 0, a: 1}
@@ -1599,7 +1599,7 @@ ParticleSystem:
     uvChannelMask: 0
     rowMode: 1
     sprites:
-    - sprite: {fileID: 21300000, guid: 69179826f08008c42ab0a08e9d1b681c, type: 3}
+    - sprite: {fileID: 21300000, guid: 265c689d530cb784e832776d36df623b, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -4870,7 +4870,7 @@ ParticleSystem:
     vectorLabel1_3: W
 --- !u!199 &1675405223479524411
 ParticleSystemRenderer:
-  serializedVersion: 6
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4916,6 +4916,7 @@ ParticleSystemRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_RenderMode: 3
   m_MeshDistribution: 0
   m_SortMode: 3
@@ -4947,4 +4948,3 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
-  m_MaskInteraction: 0
