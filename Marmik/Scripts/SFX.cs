@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 namespace USP.Utility
 {
 	[RequireComponent(typeof(AudioSource))]
-	public class SFX : Lightweight<SFX>
+	public class SFX : MonoBehaviour
 	{
 		[Serializable]
 		public class Sound
@@ -25,26 +25,26 @@ namespace USP.Utility
 			source.playOnAwake = false;
 		}
 
-		public static void PlayExclusive(int index)
+		public void PlayExclusive(int index)
 		{
-			if (Instance.source.isPlaying) return;
+			if (source.isPlaying) return;
 			Play(index);
 		}
-		public static void Play(int index)
+		public void Play(int index)
 		{
-			Sound sound = Instance.sounds[index];
-			Instance.source.PlayOneShot(sound.clip, sound.volume);
+			Sound sound = sounds[index];
+			source.PlayOneShot(sound.clip, sound.volume);
 		}
-		public static void Play(string name)
+		public void Play(string name)
 		{
-			foreach (var sound in Instance.sounds)
+			foreach (var sound in sounds)
 			{
 				if (!sound.clip.name.Contains(name, StringComparison.OrdinalIgnoreCase)) continue;
-				Instance.source.PlayOneShot(sound.clip, sound.volume);
+				source.PlayOneShot(sound.clip, sound.volume);
 				break;
 			}
 		}
-		public static void PlayRandom(params int[] indices)
+		public void PlayRandom(params int[] indices)
 		{
 			int index = indices[Random.Range(0, indices.Length)];
 			Play(index);
