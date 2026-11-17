@@ -1,5 +1,4 @@
 using UnityEngine;
-using USP.Data;
 
 namespace USP.Utility
 {
@@ -7,9 +6,9 @@ namespace USP.Utility
 	{
 		public bool IsMultiTouch;
 		public bool UnlockFrameRate;
-
-		[SerializeField] private AudioSource music, voice;
-
+#if UNITY_EDITOR
+		public float TimeScale = 1F;
+#endif
 
 		private void Awake()
 		{
@@ -17,8 +16,9 @@ namespace USP.Utility
 
 			if (UnlockFrameRate) Application.targetFrameRate = 400;
 
-			if (music != null) music.mute = !OfflineChildData.Instance.GetSettingToggleStates(SettingToggle.Music);
-			if (voice != null) voice.mute = !OfflineChildData.Instance.GetSettingToggleStates(SettingToggle.Sound);
+#if UNITY_EDITOR
+			Time.timeScale = TimeScale;
+#endif
 		}
 	}
 }
