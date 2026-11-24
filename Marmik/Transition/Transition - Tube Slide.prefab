@@ -100,7 +100,7 @@ MonoBehaviour:
   layoutGroup: {fileID: 3822885429566393029}
   tubeTemplate: {fileID: 8027596302908091277}
   tubeCount: 5
-  expandDuration: 0.125
+  expandDuration: 0.1
   collapseDuration: 0.1
   intervalDuration: 0.4
   expandEase: 3

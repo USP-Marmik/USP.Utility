@@ -44,7 +44,7 @@ public class TubeSlide : MonoBehaviour
 		}
 	}
 
-	[Button(Size.Large, Name = "Preview")]
+	[Button(Size.Large, Tint = Shade.Icterine, Name = "Preview")]
 	public void Play()
 	{
 		SetTubesActive(true);
