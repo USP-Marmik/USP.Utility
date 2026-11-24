@@ -10,15 +10,17 @@ namespace USP.Utility
 		public float TimeScale = 1F;
 #endif
 
+		private void OnValidate()
+		{
+#if UNITY_EDITOR
+			Time.timeScale = TimeScale;
+#endif
+		}
 		private void Awake()
 		{
 			Input.multiTouchEnabled = IsMultiTouch;
 
 			if (UnlockFrameRate) Application.targetFrameRate = 400;
-
-#if UNITY_EDITOR
-			Time.timeScale = TimeScale;
-#endif
 		}
 	}
 }
